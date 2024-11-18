@@ -1,4 +1,5 @@
-﻿using BusinessLogic.Services;
+﻿using BusinessLogic.Interfaces;
+using System;
 using System.Windows.Input;
 using WpfApp.Helpers;
 
@@ -7,6 +8,29 @@ namespace WpfApp.ViewModels
     public class LoginViewModel : BaseViewModel
     {
         private readonly IUserService _userService;
+        private string _login;
+        private string _password;
+        private string _errorMessage;
+
+        public string Login
+        {
+            get => _login;
+            set => SetProperty(ref _login, value);
+        }
+
+        public string Password
+        {
+            get => _password;
+            set => SetProperty(ref _password, value);
+        }
+
+        public string ErrorMessage
+        {
+            get => _errorMessage;
+            set => SetProperty(ref _errorMessage, value);
+        }
+
+        public ICommand LoginCommand { get; }
 
         public LoginViewModel(IUserService userService)
         {
@@ -14,34 +38,21 @@ namespace WpfApp.ViewModels
             LoginCommand = new RelayCommand(ExecuteLogin, CanExecuteLogin);
         }
 
-        private string _username;
-        public string Username
+        private bool CanExecuteLogin(object parameter)
         {
-            get => _username;
-            set => SetProperty(ref _username, value);
+            return !string.IsNullOrEmpty(Login) && !string.IsNullOrEmpty(Password);
         }
-
-        private string _password;
-        public string Password
-        {
-            get => _password;
-            set => SetProperty(ref _password, value);
-        }
-
-        public ICommand LoginCommand { get; }
-
-        private bool CanExecuteLogin(object parameter) => !string.IsNullOrEmpty(Username) && !string.IsNullOrEmpty(Password);
 
         private async void ExecuteLogin(object parameter)
         {
-            bool isAuthenticated = await _userService.AuthenticateUserAsync(Username, Password);
-            if (isAuthenticated)
+            try
             {
-                // Navigate to the main window or perform actions
+                var isAuthenticated = await _userService.AuthenticateUserAsync(Login, Password);
+                ErrorMessage = isAuthenticated ? "Login successful!" : "Invalid credentials.";
             }
-            else
+            catch (Exception ex)
             {
-                // Show error message
+                ErrorMessage = $"Error: {ex.Message}";
             }
         }
     }

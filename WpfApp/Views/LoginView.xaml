@@ -5,20 +5,10 @@
     <Grid>
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="300">
             <!-- Username -->
-            <Grid Margin="0,10">
-                <TextBox x:Name="UsernameTextBox" Text="{Binding Username}" />
-                <TextBlock Text="Username" IsHitTestVisible="False" Foreground="Gray"
-                           VerticalAlignment="Center" Margin="5,0"
-                           Visibility="{Binding Text, ElementName=UsernameTextBox, Converter={StaticResource TextBoxPlaceholderVisibilityConverter}}" />
-            </Grid>
+            <TextBox Tag="Username" Text="{Binding Username}" Margin="0,10"/>
 
             <!-- Password -->
-            <Grid Margin="0,10">
-                <PasswordBox x:Name="PasswordBox" Password="{Binding Password}" />
-                <TextBlock Text="Password" IsHitTestVisible="False" Foreground="Gray"
-                           VerticalAlignment="Center" Margin="5,0"
-                           Visibility="{Binding Password, ElementName=PasswordBox, Converter={StaticResource PasswordBoxPlaceholderVisibilityConverter}}" />
-            </Grid>
+            <PasswordBox Tag="Password" Margin="0,10"/>
 
             <!-- Login Button -->
             <Button Content="Login" Command="{Binding LoginCommand}" Width="100" Margin="0,10"/>

@@ -1,26 +1,24 @@
-﻿using Domain.Models;
+﻿using BusinessLogic.Interfaces;
+using Domain.Models;
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using BusinessLogic.Interfaces;
 
 namespace BusinessLogic.Services
 {
     public class UserService : IUserService
     {
-        private readonly List<User> _users = new List<User>();
+        private readonly List<User> _users = new();
 
-        // Перевірка аутентифікації
-        public Task<bool> AuthenticateUserAsync(string username, string password)
+        public Task<bool> AuthenticateUserAsync(string login, string password)
         {
-            return Task.FromResult(_users.Any(u => u.Username == username && u.PasswordHash == password));
+            return Task.FromResult(_users.Any(u => u.Login == login && u.PasswordHash == password));
         }
 
-        // Реєстрація нового користувача
         public Task RegisterUserAsync(User user)
         {
-            if (_users.Any(u => u.Username == user.Username))
+            if (_users.Any(u => u.Login == user.Login))
             {
                 throw new Exception("User already exists.");
             }
@@ -29,10 +27,9 @@ namespace BusinessLogic.Services
             return Task.CompletedTask;
         }
 
-        // Пошук користувача за ім'ям
-        public Task<User> GetUserByUsernameAsync(string username)
+        public Task<User> GetUserByLoginAsync(string login)
         {
-            return Task.FromResult(_users.FirstOrDefault(u => u.Username == username));
+            return Task.FromResult(_users.FirstOrDefault(u => u.Login == login));
         }
     }
 }

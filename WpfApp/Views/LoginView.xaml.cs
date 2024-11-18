@@ -1,6 +1,5 @@
 ﻿using System.Windows;
 using WpfApp.ViewModels;
-using WPFApp.ViewModels;
 
 namespace WpfApp.Views
 {
