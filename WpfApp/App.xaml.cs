@@ -1,38 +1,39 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
+using WpfApp.Views;
+using WPFApp.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
-using WpfApp.ViewModels;
+using WpfApp.Views;
 
-namespace WpfApp
+namespace WPFApp
 {
     public partial class App : Application
     {
         private ServiceProvider _serviceProvider;
 
-        public App()
-        {
-            var services = new ServiceCollection();
-
-            // Реєструємо ViewModels та сервіси
-            ConfigureServices(services);
-
-            _serviceProvider = services.BuildServiceProvider();
-        }
-
-        private void ConfigureServices(ServiceCollection services)
-        {
-            services.AddSingleton<MainWindowViewModel>();
-            services.AddSingleton<Views.MainWindow>();
-
-            // Підключення бізнес-логіки
-            services.AddScoped<BusinessLogic.SomeService>(); // Замініть на ваш сервіс
-        }
-
         protected override void OnStartup(StartupEventArgs e)
         {
-            var mainWindow = _serviceProvider.GetService<Views.MainWindow>();
-            mainWindow?.Show();
             base.OnStartup(e);
+
+            var serviceCollection = new ServiceCollection();
+            ConfigureServices(serviceCollection);
+            _serviceProvider = serviceCollection.BuildServiceProvider();
+
+            var loginView = new LoginView
+            {
+                DataContext = _serviceProvider.GetRequiredService<LoginViewModel>()
+            };
+            var mainWindow = new Window
+            {
+                Content = loginView,
+                Title = "Login"
+            };
+            mainWindow.Show();
+        }
+
+        private void ConfigureServices(IServiceCollection services)
+        {
+            services.AddSingleton<IUserService, UserService>();
+            services.AddTransient<LoginViewModel>();
         }
     }
 }

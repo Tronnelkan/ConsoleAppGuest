@@ -1,26 +1,33 @@
-﻿using Domain.Models;
+﻿using DataAccess.Interfaces;
+using Domain.Models;
 
-public interface IAuthService
+namespace BusinessLogic.Services
 {
-    bool Authenticate(string username, string password);
-    string GetRole(string username);
-}
-
-public class AuthService : IAuthService
-{
-    private readonly List<User> _users = new List<User>
+    public interface IAuthService
     {
-        new User { Username = "admin", Password = "admin123", Role = "Admin" },
-        new User { Username = "user", Password = "user123", Role = "User" }
-    };
-
-    public bool Authenticate(string username, string password)
-    {
-        return _users.Any(u => u.Username == username && u.Password == password);
+        bool Authenticate(string login, string password);
+        string GetUserRole(string login);
     }
 
-    public string GetRole(string username)
+    public class AuthService : IAuthService
     {
-        return _users.FirstOrDefault(u => u.Username == username)?.Role;
+        private readonly IUserRepository _userRepository;
+
+        public AuthService(IUserRepository userRepository)
+        {
+            _userRepository = userRepository;
+        }
+
+        public bool Authenticate(string login, string password)
+        {
+            var user = _userRepository.GetByLoginAsync(login).Result;
+            return user != null && BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
+        }
+
+        public string GetUserRole(string login)
+        {
+            var user = _userRepository.GetByLoginAsync(login).Result;
+            return user?.Role?.RoleName ?? "Guest";
+        }
     }
 }

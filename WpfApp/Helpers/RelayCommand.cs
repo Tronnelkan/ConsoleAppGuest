@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace WpfApp.Helpers
+namespace WPFApp.Commands
 {
     public class RelayCommand : ICommand
     {
