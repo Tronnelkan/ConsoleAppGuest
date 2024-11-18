@@ -1,10 +1,12 @@
 ﻿using Xunit;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
-using Domain.Models;
-using DataAccess;
-using DataAccess.Repositories;
 using System.Linq;
+using Domain.Models;
+using DataAccess.Repositories;
+
+using DataAccess;
+
 
 namespace Tests
 {

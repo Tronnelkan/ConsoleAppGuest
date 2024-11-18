@@ -2,14 +2,16 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
-using DataAccess;
-using DataAccess.Interfaces;
-using Domain.Models;
 using BCrypt.Net;
 using System.Linq;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
+using System.Data;
+using System.Net;
+using Domain.Models;
+using DataAccess.Interfaces;
+using DataAccess;
 
-namespace ConsoleApp1
+namespace ConsoleApp5
 {
     class Program
     {
