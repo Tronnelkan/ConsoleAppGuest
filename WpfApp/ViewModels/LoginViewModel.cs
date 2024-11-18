@@ -1,74 +1,48 @@
-﻿using System;
+﻿using BusinessLogic.Services;
 using System.Windows.Input;
-using BusinessLogic.Services;
-using Domain.Models;
-using WPFApp.Commands;
-using WPFApp.Helpers;
+using WpfApp.Helpers;
 
-namespace WPFApp.ViewModels
+namespace WpfApp.ViewModels
 {
     public class LoginViewModel : BaseViewModel
     {
-        private readonly IAuthService _authService;
-        private string _username;
-        private string _password;
-        private string _errorMessage;
+        private readonly IUserService _userService;
 
+        public LoginViewModel(IUserService userService)
+        {
+            _userService = userService;
+            LoginCommand = new RelayCommand(ExecuteLogin, CanExecuteLogin);
+        }
+
+        private string _username;
         public string Username
         {
             get => _username;
             set => SetProperty(ref _username, value);
         }
 
+        private string _password;
         public string Password
         {
             get => _password;
             set => SetProperty(ref _password, value);
         }
 
-        public string ErrorMessage
-        {
-            get => _errorMessage;
-            set => SetProperty(ref _errorMessage, value);
-        }
-
         public ICommand LoginCommand { get; }
 
-        public LoginViewModel(IAuthService authService)
-        {
-            _authService = authService;
-            LoginCommand = new RelayCommand(ExecuteLogin, CanExecuteLogin);
-        }
+        private bool CanExecuteLogin(object parameter) => !string.IsNullOrEmpty(Username) && !string.IsNullOrEmpty(Password);
 
-        private bool CanExecuteLogin(object parameter)
+        private async void ExecuteLogin(object parameter)
         {
-            return !string.IsNullOrEmpty(Username) && !string.IsNullOrEmpty(Password);
-        }
-
-        private void ExecuteLogin(object parameter)
-        {
-            try
+            bool isAuthenticated = await _userService.AuthenticateUserAsync(Username, Password);
+            if (isAuthenticated)
             {
-                if (_authService.Authenticate(Username, Password))
-                {
-                    var role = _authService.GetRole(Username);
-                    NavigateToDashboard(role);
-                }
-                else
-                {
-                    ErrorMessage = "Invalid username or password.";
-                }
+                // Navigate to the main window or perform actions
             }
-            catch (Exception ex)
+            else
             {
-                ErrorMessage = $"Error: {ex.Message}";
+                // Show error message
             }
-        }
-
-        private void NavigateToDashboard(string role)
-        {
-            // TODO: Implement navigation logic to the appropriate dashboard based on the role.
-            // Example: if (role == "Admin") -> AdminDashboard
         }
     }
 }

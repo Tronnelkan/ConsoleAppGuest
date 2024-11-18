@@ -1,14 +1,12 @@
 ﻿using System.Windows;
-using WpfApp.ViewModels;
 
-namespace WpfApp.Views
+namespace WpfApp
 {
     public partial class MainWindow : Window
     {
-        public MainWindow(MainWindowViewModel viewModel)
+        public MainWindow()
         {
             InitializeComponent();
-            DataContext = viewModel;
         }
     }
 }

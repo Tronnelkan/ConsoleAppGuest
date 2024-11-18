@@ -1,7 +1,9 @@
-﻿using System;
+﻿using BusinessLogic.Services;
+using Domain.Models;
+using System;
 using System.Windows.Input;
-using WPFApp.Commands;
 using WpfApp.Helpers;
+using WpfApp.ViewModels;
 
 namespace WPFApp.ViewModels
 {
