@@ -9,11 +9,10 @@ namespace WpfApp.Helpers
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is string text)
+            if (value is string text && !string.IsNullOrEmpty(text))
             {
-                return string.IsNullOrEmpty(text) ? Visibility.Visible : Visibility.Collapsed;
+                return Visibility.Collapsed;
             }
-
             return Visibility.Visible;
         }
 

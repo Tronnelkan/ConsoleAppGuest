@@ -5,8 +5,9 @@ namespace BusinessLogic.Interfaces
 {
     public interface IUserService
     {
-        Task<bool> AuthenticateUserAsync(string login, string password);
+        Task<bool> AuthenticateUserAsync(string username, string password);
         Task RegisterUserAsync(User user);
-        Task<User> GetUserByLoginAsync(string login);
+        Task<User> GetUserByUsernameAsync(string username);
+        void ResetPassword(string username, string recoveryKeyword, string newPassword);
     }
 }
