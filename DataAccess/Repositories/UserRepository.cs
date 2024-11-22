@@ -1,16 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DataAccess.Interfaces;
+using Domain.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Domain.Models;
-using DataAccess.Interfaces;
 
 namespace DataAccess.Repositories
 {
     public class UserRepository : Repository<User>, IUserRepository
     {
-        public UserRepository(AppDbContext context) : base(context)
-        {
-        }
+        public UserRepository(AppDbContext context) : base(context) { }
 
         public async Task<IEnumerable<User>> GetAllWithRolesAsync()
         {

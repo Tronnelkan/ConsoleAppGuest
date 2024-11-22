@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿// WpfApp/Views/LoginView.xaml.cs
+using System.Windows;
 using WpfApp.ViewModels;
 
 namespace WpfApp.Views
@@ -8,7 +9,7 @@ namespace WpfApp.Views
         public LoginView(LoginViewModel viewModel)
         {
             InitializeComponent();
-            DataContext = viewModel;
+            this.DataContext = viewModel;
         }
     }
 }

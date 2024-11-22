@@ -1,10 +1,16 @@
-﻿using System.Windows;
-using Microsoft.Extensions.DependencyInjection;
+﻿// WpfApp/App.xaml.cs
 using BusinessLogic.Interfaces;
 using BusinessLogic.Services;
+using DataAccess;
+using DataAccess.Interfaces;
+using DataAccess.Repositories;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Windows;
+using WpfApp.DependencyInjection;
 using WpfApp.ViewModels;
 using WpfApp.Views;
-using Microsoft.Win32;
 
 namespace WpfApp
 {
@@ -12,27 +18,33 @@ namespace WpfApp
     {
         private ServiceProvider _serviceProvider;
 
-        protected override void OnStartup(StartupEventArgs e)
+        public App()
         {
             var serviceCollection = new ServiceCollection();
+
             ConfigureServices(serviceCollection);
 
             _serviceProvider = serviceCollection.BuildServiceProvider();
-            var mainView = _serviceProvider.GetRequiredService<MainView>();
-            mainView.Show();
         }
 
-        private void ConfigureServices(ServiceCollection services)
+        private void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<IUserService, UserService>();
-            services.AddTransient<MainViewModel>();
-            services.AddTransient<MainView>();
-            services.AddTransient<RegisterViewModel>();
-            services.AddTransient<RegisterView>();
-            services.AddTransient<LoginViewModel>();
-            services.AddTransient<LoginView>();
-            services.AddTransient<RecoveryPasswordViewModel>();
-            services.AddTransient<RecoveryPasswordView>();
+            string connectionString = "Host=localhost;Port=5433;Database=MICRO_DB;Username=postgres;Password=tatarinn";
+
+            services.AddDataAccessServices(connectionString)
+                    .AddBusinessLogicServices()
+                    .AddViewModels()
+                    .AddViews();
+        }
+
+        protected override void OnStartup(StartupEventArgs e)
+        {
+
+            // Запуск главного меню
+            var mainView = _serviceProvider.GetRequiredService<MainView>();
+            mainView.Show();
+
+            base.OnStartup(e);
         }
     }
 }

@@ -1,27 +1,51 @@
-﻿using System;
+﻿// WpfApp/Commands/RelayCommand.cs
+using System;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace WpfApp.Helpers
+namespace WpfApp.Commands
 {
     public class RelayCommand : ICommand
     {
-        private readonly Action<object> _execute;
-        private readonly Predicate<object> _canExecute;
+        private readonly Func<object, Task> _executeAsync;
+        private readonly Func<object, bool> _canExecute;
+        private bool _isExecuting;
 
-        public RelayCommand(Action<object> execute, Predicate<object> canExecute = null)
+        public RelayCommand(Func<object, Task> executeAsync, Func<object, bool> canExecute = null)
         {
-            _execute = execute ?? throw new ArgumentNullException(nameof(execute));
+            _executeAsync = executeAsync ?? throw new ArgumentNullException(nameof(executeAsync));
             _canExecute = canExecute;
         }
 
-        public bool CanExecute(object parameter) => _canExecute?.Invoke(parameter) ?? true;
-
-        public void Execute(object parameter) => _execute(parameter);
-
-        public event EventHandler CanExecuteChanged
+        public bool CanExecute(object parameter)
         {
-            add => CommandManager.RequerySuggested += value;
-            remove => CommandManager.RequerySuggested -= value;
+            return !_isExecuting && (_canExecute?.Invoke(parameter) ?? true);
+        }
+
+        public async void Execute(object parameter)
+        {
+            if (!CanExecute(parameter))
+                return;
+
+            _isExecuting = true;
+            RaiseCanExecuteChanged();
+
+            try
+            {
+                await _executeAsync(parameter);
+            }
+            finally
+            {
+                _isExecuting = false;
+                RaiseCanExecuteChanged();
+            }
+        }
+
+        public event EventHandler CanExecuteChanged;
+
+        public void RaiseCanExecuteChanged()
+        {
+            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 }

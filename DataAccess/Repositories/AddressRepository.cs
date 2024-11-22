@@ -1,16 +1,14 @@
-﻿using System.Threading.Tasks;
+﻿using DataAccess.Interfaces;
 using Domain.Models;
-using DataAccess.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace DataAccess.Repositories
 {
     public class AddressRepository : Repository<Address>, IAddressRepository
     {
-        public AddressRepository(AppDbContext context) : base(context)
-        {
-        }
+        public AddressRepository(AppDbContext context) : base(context) { }
 
         public async Task<bool> ExistsAsync(string street, string city, string country)
         {

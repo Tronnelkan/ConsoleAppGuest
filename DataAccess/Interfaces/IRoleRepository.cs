@@ -1,5 +1,6 @@
-﻿using System.Threading.Tasks;
-using Domain.Models;
+﻿using Domain.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace DataAccess.Interfaces
 {

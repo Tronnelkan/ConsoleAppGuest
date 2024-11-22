@@ -1,15 +1,21 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿// Domain/Models/User.cs
+using System.ComponentModel.DataAnnotations;
 
 namespace Domain.Models
 {
     public class User
     {
+        [Key]
         public int UserId { get; set; }
 
         [Required]
         [MaxLength(50)]
         public string Login { get; set; }
+
+        [Required]
+        [EmailAddress]
+        [MaxLength(100)]
+        public string Email { get; set; }
 
         [Required]
         [MaxLength(100)]
@@ -20,31 +26,32 @@ namespace Domain.Models
         public string LastName { get; set; }
 
         [Required]
-        public string PasswordHash { get; set; }
-
-        [Required]
-        public string RecoveryKeyword { get; set; }
-
-        [Required]
+        [MaxLength(10)]
         public string Gender { get; set; }
-
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; }
 
         [Required]
         [Phone]
         public string Phone { get; set; }
 
         [Required]
+        [MaxLength(16)]
         public string BankCardData { get; set; }
 
-        [ForeignKey("Role")]
+        [Required]
         public int RoleId { get; set; }
-        public Role Role { get; set; }
 
-        [ForeignKey("Address")]
+        [Required]
         public int AddressId { get; set; }
+
+        // Добавляем свойство PasswordHash
+        [Required]
+        public string PasswordHash { get; set; }
+
+        [Required]
+        public string RecoveryKeyword { get; set; }
+
+        // Навигационные свойства (если используются)
+        public Role Role { get; set; }
         public Address Address { get; set; }
     }
 }

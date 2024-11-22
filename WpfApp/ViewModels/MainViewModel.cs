@@ -1,48 +1,66 @@
-﻿using Microsoft.Win32;
+﻿// WpfApp/ViewModels/MainViewModel.cs
+using BusinessLogic.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using WpfApp.Helpers;
+using WpfApp.Commands;
 using WpfApp.Views;
-using BusinessLogic.Interfaces;
 
 namespace WpfApp.ViewModels
 {
     public class MainViewModel : BaseViewModel
     {
-        private readonly IUserService _userService;
+        private readonly IServiceProvider _serviceProvider;
 
         public ICommand OpenRegisterCommand { get; }
         public ICommand OpenLoginCommand { get; }
-        public ICommand OpenRecoveryCommand { get; }
+        public ICommand OpenRecoveryPasswordCommand { get; }
 
-        public string ErrorMessage { get; set; }
+        public ICommand LogoutCommand { get; }
 
-        // Передаємо IUserService через конструктор
-        public MainViewModel(IUserService userService)
+        public MainViewModel(IServiceProvider serviceProvider)
         {
-            _userService = userService;
+            _serviceProvider = serviceProvider;
 
-            OpenRegisterCommand = new RelayCommand(OpenRegister);
-            OpenLoginCommand = new RelayCommand(OpenLogin);
-            OpenRecoveryCommand = new RelayCommand(OpenRecovery);
+            OpenRegisterCommand = new RelayCommand(async o => await OpenRegisterAsync());
+            OpenLoginCommand = new RelayCommand(async o => await OpenLoginAsync());
+            OpenRecoveryPasswordCommand = new RelayCommand(async o => await OpenRecoveryPasswordAsync());
+
+            LogoutCommand = new RelayCommand(async o => await LogoutAsync());
         }
 
-        private void OpenRegister(object parameter)
+        private async Task OpenRegisterAsync()
         {
-            var registerView = new RegisterView(new RegisterViewModel(_userService));
+            var registerView = _serviceProvider.GetRequiredService<RegisterView>();
             registerView.Show();
+            await Task.CompletedTask;
         }
 
-        private void OpenLogin(object parameter)
+        private async Task OpenLoginAsync()
         {
-            var loginView = new LoginView(new LoginViewModel(_userService));
+            var loginView = _serviceProvider.GetRequiredService<LoginView>();
             loginView.Show();
+            await Task.CompletedTask;
         }
 
-        private void OpenRecovery(object parameter)
+        private async Task OpenRecoveryPasswordAsync()
         {
-            var recoveryView = new RecoveryPasswordView(new RecoveryPasswordViewModel(_userService));
+            var recoveryView = _serviceProvider.GetRequiredService<RecoveryPasswordView>();
             recoveryView.Show();
+            await Task.CompletedTask;
+        }
+
+        private async Task LogoutAsync()
+        {
+            // Логика выхода из системы (например, очистка сессии)
+            var loginView = _serviceProvider.GetRequiredService<LoginView>();
+            loginView.Show();
+
+            // Закрытие текущего окна
+            Application.Current.Windows.OfType<Window>().SingleOrDefault(w => w.DataContext == this)?.Close();
+            await Task.CompletedTask;
         }
     }
 }

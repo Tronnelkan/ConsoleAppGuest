@@ -1,12 +1,12 @@
-﻿// WpfApp/Views/RecoveryPasswordView.xaml.cs
+﻿// WpfApp/Views/AddAddressView.xaml.cs
 using System.Windows;
 using WpfApp.ViewModels;
 
 namespace WpfApp.Views
 {
-    public partial class RecoveryPasswordView : Window
+    public partial class AddAddressView : Window
     {
-        public RecoveryPasswordView(RecoveryPasswordViewModel viewModel)
+        public AddAddressView(AddAddressViewModel viewModel)
         {
             InitializeComponent();
             this.DataContext = viewModel;

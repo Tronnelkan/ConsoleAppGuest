@@ -7,10 +7,19 @@
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
                     <Grid>
-                        <TextBox x:Name="InputTextBox" Text="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBlock Text="{TemplateBinding Tag}" Foreground="Gray" 
-                                   Visibility="{Binding Text.Length, ElementName=InputTextBox, Converter={StaticResource PlaceholderVisibilityConverter}}" 
-                                   IsHitTestVisible="False" VerticalAlignment="Center" Margin="5,0" />
+                        <ScrollViewer x:Name="PART_ContentHost" 
+                                      Background="{TemplateBinding Background}" 
+                                      BorderBrush="{TemplateBinding BorderBrush}" 
+                                      BorderThickness="{TemplateBinding BorderThickness}" />
+
+                        <TextBlock Text="{TemplateBinding Tag}" 
+                                   Foreground="Gray" 
+                                   Visibility="{Binding Text.Length, 
+                                                        RelativeSource={RelativeSource TemplatedParent}, 
+                                                        Converter={StaticResource PlaceholderVisibilityConverter}}" 
+                                   IsHitTestVisible="False" 
+                                   VerticalAlignment="Center" 
+                                   Margin="5,0" />
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
@@ -23,10 +32,19 @@
             <Setter.Value>
                 <ControlTemplate TargetType="PasswordBox">
                     <Grid>
-                        <PasswordBox x:Name="InputPasswordBox" Password="{Binding Password, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" />
-                        <TextBlock Text="{TemplateBinding Tag}" Foreground="Gray" 
-                                   Visibility="{Binding Password.Length, ElementName=InputPasswordBox, Converter={StaticResource PlaceholderVisibilityConverter}}" 
-                                   IsHitTestVisible="False" VerticalAlignment="Center" Margin="5,0" />
+                        <ScrollViewer x:Name="PART_ContentHost" 
+                                      Background="{TemplateBinding Background}" 
+                                      BorderBrush="{TemplateBinding BorderBrush}" 
+                                      BorderThickness="{TemplateBinding BorderThickness}" />
+
+                        <TextBlock Text="{TemplateBinding Tag}" 
+                                   Foreground="Gray" 
+                                   Visibility="{Binding Password.Length, 
+                                                        RelativeSource={RelativeSource TemplatedParent}, 
+                                                        Converter={StaticResource PlaceholderVisibilityConverter}}" 
+                                   IsHitTestVisible="False" 
+                                   VerticalAlignment="Center" 
+                                   Margin="5,0" />
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>

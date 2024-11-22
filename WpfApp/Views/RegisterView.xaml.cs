@@ -1,29 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// WpfApp/Views/RegisterView.xaml.cs
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using WpfApp.ViewModels;
 
 namespace WpfApp.Views
 {
-    /// <summary>
-    /// Логика взаимодействия для RegisterView.xaml
-    /// </summary>
     public partial class RegisterView : Window
     {
         public RegisterView(RegisterViewModel viewModel)
         {
             InitializeComponent();
-            DataContext = viewModel;
+            this.DataContext = viewModel;
+            this.ContentRendered += async (s, e) => await viewModel.LoadRolesAndAddressesAsync();
         }
     }
 }
