@@ -1,4 +1,6 @@
-﻿using DataAccess.Interfaces;
+﻿// DataAccess/ServiceCollectionExtensions.cs
+
+using DataAccess.Interfaces;
 using DataAccess.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 

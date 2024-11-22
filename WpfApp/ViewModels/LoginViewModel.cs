@@ -2,7 +2,6 @@
 using BusinessLogic.Interfaces;
 using Domain.Models;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,7 +16,6 @@ namespace WpfApp.ViewModels
     {
         private readonly IUserService _userService;
         private readonly IServiceProvider _serviceProvider;
-        private readonly ILogger<LoginViewModel> _logger;
         private readonly ISessionService _sessionService;
 
         public ICommand LoginCommand { get; }
@@ -43,13 +41,12 @@ namespace WpfApp.ViewModels
             set => SetProperty(ref _errorMessage, value);
         }
 
-        public LoginViewModel(IUserService userService, IServiceProvider serviceProvider, ILogger<LoginViewModel> logger, ISessionService sessionService)
+        public LoginViewModel(IUserService userService, IServiceProvider serviceProvider, ISessionService sessionService)
         {
             _userService = userService;
             _serviceProvider = serviceProvider;
-            _logger = logger;
             _sessionService = sessionService;
-            LoginCommand = new RelayCommand(async o => await LoginAsync(), o => CanLogin());
+            LoginCommand = new RelayCommand(async o => await LoginAsync(o), o => CanLogin());
         }
 
         private bool CanLogin()
@@ -57,18 +54,19 @@ namespace WpfApp.ViewModels
             return !string.IsNullOrEmpty(Username) && !string.IsNullOrEmpty(Password);
         }
 
-        private async Task LoginAsync()
+        private async Task LoginAsync(object parameter)
         {
             try
             {
-                _logger.LogInformation("Attempting to authenticate user {Username}", Username);
+                // Отладочное сообщение для проверки выполнения команды
+                MessageBox.Show("LoginCommand выполнен");
+
                 User user = await _userService.AuthenticateUserAsync(Username, Password);
                 bool isAuthenticated = user != null;
 
                 if (isAuthenticated)
                 {
                     _sessionService.CurrentUser = user;
-                    _logger.LogInformation("User {Username} authenticated successfully.", Username);
                     var mainView = _serviceProvider.GetRequiredService<MainView>();
                     mainView.Show();
                     // Закрытие окна логина
@@ -76,13 +74,11 @@ namespace WpfApp.ViewModels
                 }
                 else
                 {
-                    _logger.LogWarning("Authentication failed for user {Username}.", Username);
                     ErrorMessage = "Invalid username or password.";
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred during login for user {Username}.", Username);
                 ErrorMessage = ex.Message;
             }
         }

@@ -1,22 +1,25 @@
 ﻿// WpfApp/ViewModels/AddAddressViewModel.cs
+using BusinessLogic.Interfaces;
 using Domain.Models;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using WpfApp.Commands;
-using System.Linq;
+using WpfApp.Views;
 
 namespace WpfApp.ViewModels
 {
     public class AddAddressViewModel : BaseViewModel
     {
-        public ICommand SaveCommand { get; }
-        public ICommand CancelCommand { get; }
+        private readonly IUserService _userService;
+
+        public ICommand AddAddressCommand { get; }
 
         private string _street;
         [Required(ErrorMessage = "Street is required.")]
-        [MaxLength(150)]
         public string Street
         {
             get => _street;
@@ -24,14 +27,13 @@ namespace WpfApp.ViewModels
             {
                 if (SetProperty(ref _street, value))
                 {
-                    ValidateProperty(value);
+                    OnPropertyChanged(nameof(Street));
                 }
             }
         }
 
         private string _city;
         [Required(ErrorMessage = "City is required.")]
-        [MaxLength(100)]
         public string City
         {
             get => _city;
@@ -39,14 +41,13 @@ namespace WpfApp.ViewModels
             {
                 if (SetProperty(ref _city, value))
                 {
-                    ValidateProperty(value);
+                    OnPropertyChanged(nameof(City));
                 }
             }
         }
 
         private string _country;
         [Required(ErrorMessage = "Country is required.")]
-        [MaxLength(100)]
         public string Country
         {
             get => _country;
@@ -54,34 +55,39 @@ namespace WpfApp.ViewModels
             {
                 if (SetProperty(ref _country, value))
                 {
-                    ValidateProperty(value);
+                    OnPropertyChanged(nameof(Country));
                 }
             }
         }
 
-        public Address NewAddress { get; private set; }
-
-        public AddAddressViewModel()
+        // Error Message
+        private string _errorMessage;
+        public string ErrorMessage
         {
-            SaveCommand = new RelayCommand(async o => await SaveAsync(), o => !HasErrors);
-            CancelCommand = new RelayCommand(async o => { Cancel(); await Task.CompletedTask; }, o => true);
-
-            this.ErrorsChanged += (s, e) =>
-            {
-                (SaveCommand as RelayCommand)?.RaiseCanExecuteChanged();
-                (CancelCommand as RelayCommand)?.RaiseCanExecuteChanged();
-            };
+            get => _errorMessage;
+            set => SetProperty(ref _errorMessage, value);
         }
 
-        private async Task SaveAsync()
+        public Address NewAddress { get; private set; }
+
+        public AddAddressViewModel(IUserService userService)
+        {
+            _userService = userService;
+            AddAddressCommand = new RelayCommand(async o => await AddAddressAsync(o), o => !HasErrors);
+        }
+
+        private async Task AddAddressAsync(object parameter)
         {
             try
             {
+                // Проверка наличия ошибок валидации
                 ValidateAllProperties();
 
                 if (HasErrors)
                 {
-                    MessageBox.Show("Please fix the errors before saving.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    var errors = GetAllErrors();
+                    ErrorMessage = string.Join("\n", errors);
+                    MessageBox.Show($"Please fix the following errors:\n{ErrorMessage}", "Validation Errors", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
@@ -92,31 +98,39 @@ namespace WpfApp.ViewModels
                     Country = this.Country
                 };
 
-                // Закрытие окна с DialogResult = true
-                var window = Application.Current.Windows.OfType<Window>().SingleOrDefault(w => w.DataContext == this);
-                if (window != null)
-                {
-                    window.DialogResult = true;
-                    window.Close();
-                }
+                await _userService.AddAddressAsync(NewAddress);
+                MessageBox.Show("Address added successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                await Task.CompletedTask;
+                // Закрыть окно добавления адреса
+                var addAddressWindow = Application.Current.Windows.OfType<AddAddressView>().FirstOrDefault();
+                addAddressWindow?.Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error saving address: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                ErrorMessage = $"Error adding address: {ex.Message}";
+                MessageBox.Show($"Error adding address: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private void Cancel()
+        /// <summary>
+        /// Получает все ошибки валидации для текущей модели.
+        /// </summary>
+        /// <returns>Список сообщений об ошибках.</returns>
+        private IEnumerable<string> GetAllErrors()
         {
-            // Закрытие окна без сохранения
-            var window = Application.Current.Windows.OfType<Window>().SingleOrDefault(w => w.DataContext == this);
-            if (window != null)
+            var errors = new List<string>();
+
+            var properties = GetType().GetProperties();
+            foreach (var property in properties)
             {
-                window.DialogResult = false;
-                window.Close();
+                var error = this[property.Name];
+                if (!string.IsNullOrEmpty(error))
+                {
+                    errors.Add(error);
+                }
             }
+
+            return errors;
         }
     }
 }

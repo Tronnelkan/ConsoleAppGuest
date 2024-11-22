@@ -1,78 +1,79 @@
 ﻿// WpfApp/ViewModels/BaseViewModel.cs
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.ComponentModel.DataAnnotations;
 
 namespace WpfApp.ViewModels
 {
-    public class BaseViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
+    public class BaseViewModel : INotifyPropertyChanged, IDataErrorInfo
     {
         public event PropertyChangedEventHandler PropertyChanged;
-        public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged;
-
-        private readonly Dictionary<string, List<string>> _errors = new Dictionary<string, List<string>>();
-
-        public bool HasErrors => _errors.Any();
-
-        public IEnumerable GetErrors(string propertyName)
-        {
-            if (string.IsNullOrEmpty(propertyName))
-                return _errors.SelectMany(err => err.Value);
-
-            if (_errors.ContainsKey(propertyName))
-                return _errors[propertyName];
-
-            return null;
-        }
 
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        protected void ValidateProperty(object value, [CallerMemberName] string propertyName = null)
+        protected bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
         {
-            var validationContext = new ValidationContext(this)
-            {
-                MemberName = propertyName
-            };
-            var results = new List<ValidationResult>();
-
-            Validator.TryValidateProperty(value, validationContext, results);
-
-            if (_errors.ContainsKey(propertyName))
-                _errors.Remove(propertyName);
-
-            if (results.Any())
-                _errors.Add(propertyName, results.Select(c => c.ErrorMessage).ToList());
-
-            ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
+            if (EqualityComparer<T>.Default.Equals(storage, value))
+                return false;
+            storage = value;
+            OnPropertyChanged(propertyName);
+            return true;
         }
 
-        protected void ValidateAllProperties()
-        {
-            var properties = GetType().GetProperties()
-                                     .Where(prop => Attribute.IsDefined(prop, typeof(ValidationAttribute)));
+        // Реализация IDataErrorInfo для валидации
+        public string Error => null;
 
-            foreach (var property in properties)
+        public string this[string columnName]
+        {
+            get
             {
+                var validationContext = new ValidationContext(this)
+                {
+                    MemberName = columnName
+                };
+                var results = new List<ValidationResult>();
+                var property = GetType().GetProperty(columnName);
+                if (property == null)
+                    return null;
                 var value = property.GetValue(this);
-                ValidateProperty(value, property.Name);
+                bool isValid = Validator.TryValidateProperty(value, validationContext, results);
+                if (isValid)
+                    return null;
+                return results.First().ErrorMessage;
             }
         }
 
-        protected bool SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+        public bool HasErrors
         {
-            if (EqualityComparer<T>.Default.Equals(field, value))
+            get
+            {
+                var properties = GetType().GetProperties();
+                foreach (var property in properties)
+                {
+                    if (!string.IsNullOrEmpty(this[property.Name]))
+                        return true;
+                }
                 return false;
+            }
+        }
 
-            field = value;
-            OnPropertyChanged(propertyName);
-            return true;
+        // Метод для валидации всех свойств
+        public void ValidateAllProperties()
+        {
+            foreach (var property in GetType().GetProperties())
+            {
+                var error = this[property.Name];
+                if (!string.IsNullOrEmpty(error))
+                {
+                    // Здесь можно логировать или обрабатывать ошибки
+                }
+            }
         }
     }
 }

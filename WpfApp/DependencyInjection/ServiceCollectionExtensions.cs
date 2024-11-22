@@ -6,6 +6,7 @@ using DataAccess.Interfaces;
 using DataAccess.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Domain.Models;
 using WpfApp.ViewModels;
 using WpfApp.Views;
 
@@ -15,12 +16,15 @@ namespace WpfApp.DependencyInjection
     {
         public static IServiceCollection AddDataAccessServices(this IServiceCollection services, string connectionString)
         {
+            // Настройка DbContext
             services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(connectionString));
 
+            // Регистрация универсальных репозиториев
+            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+            // Регистрация специфичных репозиториев
             services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IRoleRepository, RoleRepository>();
-            services.AddScoped<IAddressRepository, AddressRepository>();
 
             return services;
         }
@@ -28,18 +32,17 @@ namespace WpfApp.DependencyInjection
         public static IServiceCollection AddBusinessLogicServices(this IServiceCollection services)
         {
             services.AddScoped<IUserService, UserService>();
-            services.AddSingleton<ISessionService, SessionService>();
-            // Добавьте другие сервисы бизнес-логики при необходимости
+
             return services;
         }
 
         public static IServiceCollection AddViewModels(this IServiceCollection services)
         {
-            services.AddTransient<MainViewModel>();
             services.AddTransient<RegisterViewModel>();
-            services.AddTransient<LoginViewModel>();
+            services.AddTransient<AddAddressViewModel>();
             services.AddTransient<RecoveryPasswordViewModel>();
-            services.AddTransient<AddAddressViewModel>(); // Добавлено
+            services.AddTransient<BaseViewModel>();
+
             return services;
         }
 
@@ -47,9 +50,9 @@ namespace WpfApp.DependencyInjection
         {
             services.AddTransient<MainView>();
             services.AddTransient<RegisterView>();
-            services.AddTransient<LoginView>();
+            services.AddTransient<AddAddressView>();
             services.AddTransient<RecoveryPasswordView>();
-            services.AddTransient<AddAddressView>(); // Добавлено
+
             return services;
         }
     }

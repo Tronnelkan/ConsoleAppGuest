@@ -1,17 +1,17 @@
-﻿// WpfApp/Helpers/PasswordBoxHelper.cs
+﻿// WpfApp/Helpers/PasswordBoxBindingBehavior.cs
 using System.Windows;
 using System.Windows.Controls;
 
 namespace WpfApp.Helpers
 {
-    public static class PasswordBoxHelper
+    public static class PasswordBoxBindingBehavior
     {
         // Присоединяемое свойство для связывания пароля
         public static readonly DependencyProperty BoundPassword =
             DependencyProperty.RegisterAttached(
                 "BoundPassword",
                 typeof(string),
-                typeof(PasswordBoxHelper),
+                typeof(PasswordBoxBindingBehavior),
                 new PropertyMetadata(string.Empty, OnBoundPasswordChanged));
 
         // Присоединяемое свойство для включения/отключения связывания
@@ -19,7 +19,7 @@ namespace WpfApp.Helpers
             DependencyProperty.RegisterAttached(
                 "BindPassword",
                 typeof(bool),
-                typeof(PasswordBoxHelper),
+                typeof(PasswordBoxBindingBehavior),
                 new PropertyMetadata(false, OnBindPasswordChanged));
 
         // Внутреннее присоединяемое свойство для предотвращения рекурсии
@@ -27,7 +27,7 @@ namespace WpfApp.Helpers
             DependencyProperty.RegisterAttached(
                 "UpdatingPassword",
                 typeof(bool),
-                typeof(PasswordBoxHelper),
+                typeof(PasswordBoxBindingBehavior),
                 new PropertyMetadata(false));
 
         // Геттеры и сеттеры для BoundPassword

@@ -1,4 +1,5 @@
-﻿using Domain.Models;
+﻿// DataAccess/Interfaces/IUserRepository.cs
+using Domain.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

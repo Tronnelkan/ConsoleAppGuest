@@ -7,11 +7,10 @@ namespace BusinessLogic.Interfaces
 {
     public interface IUserService
     {
-        Task RegisterUserAsync(User user, string password);
-        Task<User> AuthenticateUserAsync(string username, string password);
         Task<IEnumerable<Role>> GetAllRolesAsync();
         Task<IEnumerable<Address>> GetAllAddressesAsync();
-        Task<bool> RecoverPasswordAsync(string username, string recoveryKeyword, string newPassword);
-        Task AddAddressAsync(Address address); // Добавлено
+        Task RegisterUserAsync(User user, string password);
+        Task AddAddressAsync(Address address);
+        Task<bool> RecoverPasswordAsync(string email, string recoveryKeyword, string newPassword);
     }
 }

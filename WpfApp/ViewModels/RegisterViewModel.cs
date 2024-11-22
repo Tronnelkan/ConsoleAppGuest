@@ -1,9 +1,9 @@
 ﻿// WpfApp/ViewModels/RegisterViewModel.cs
 using BusinessLogic.Interfaces;
 using Domain.Models;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,6 +11,7 @@ using System.Windows;
 using System.Windows.Input;
 using WpfApp.Commands;
 using WpfApp.Views;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WpfApp.ViewModels
 {
@@ -33,7 +34,7 @@ namespace WpfApp.ViewModels
             {
                 if (SetProperty(ref _username, value))
                 {
-                    ValidateProperty(value);
+                    OnPropertyChanged(nameof(Username));
                 }
             }
         }
@@ -50,7 +51,7 @@ namespace WpfApp.ViewModels
             {
                 if (SetProperty(ref _email, value))
                 {
-                    ValidateProperty(value);
+                    OnPropertyChanged(nameof(Email));
                 }
             }
         }
@@ -66,7 +67,7 @@ namespace WpfApp.ViewModels
             {
                 if (SetProperty(ref _firstName, value))
                 {
-                    ValidateProperty(value);
+                    OnPropertyChanged(nameof(FirstName));
                 }
             }
         }
@@ -82,7 +83,7 @@ namespace WpfApp.ViewModels
             {
                 if (SetProperty(ref _lastName, value))
                 {
-                    ValidateProperty(value);
+                    OnPropertyChanged(nameof(LastName));
                 }
             }
         }
@@ -97,7 +98,7 @@ namespace WpfApp.ViewModels
             {
                 if (SetProperty(ref _gender, value))
                 {
-                    ValidateProperty(value);
+                    OnPropertyChanged(nameof(Gender));
                 }
             }
         }
@@ -120,7 +121,7 @@ namespace WpfApp.ViewModels
             {
                 if (SetProperty(ref _phone, value))
                 {
-                    ValidateProperty(value);
+                    OnPropertyChanged(nameof(Phone));
                 }
             }
         }
@@ -136,7 +137,7 @@ namespace WpfApp.ViewModels
             {
                 if (SetProperty(ref _bankCardData, value))
                 {
-                    ValidateProperty(value);
+                    OnPropertyChanged(nameof(BankCardData));
                 }
             }
         }
@@ -152,8 +153,9 @@ namespace WpfApp.ViewModels
             {
                 if (SetProperty(ref _password, value))
                 {
-                    ValidateProperty(value);
-                    ValidateProperty(ConfirmPassword, nameof(ConfirmPassword));
+                    // Trigger validation for ConfirmPassword as well
+                    OnPropertyChanged(nameof(Password));
+                    OnPropertyChanged(nameof(ConfirmPassword));
                 }
             }
         }
@@ -169,7 +171,7 @@ namespace WpfApp.ViewModels
             {
                 if (SetProperty(ref _confirmPassword, value))
                 {
-                    ValidateProperty(value);
+                    OnPropertyChanged(nameof(ConfirmPassword));
                 }
             }
         }
@@ -200,7 +202,7 @@ namespace WpfApp.ViewModels
             {
                 if (SetProperty(ref _selectedRole, value))
                 {
-                    ValidateProperty(value);
+                    OnPropertyChanged(nameof(SelectedRole));
                 }
             }
         }
@@ -222,7 +224,7 @@ namespace WpfApp.ViewModels
             {
                 if (SetProperty(ref _selectedAddress, value))
                 {
-                    ValidateProperty(value);
+                    OnPropertyChanged(nameof(SelectedAddress));
                 }
             }
         }
@@ -239,22 +241,13 @@ namespace WpfApp.ViewModels
         {
             _userService = userService;
             _serviceProvider = serviceProvider;
-            RegisterCommand = new RelayCommand(async o => await RegisterAsync(), o => !HasErrors);
-            AddAddressCommand = new RelayCommand(async o => await AddAddressAsync(), o => true);
 
-            // Загрузка ролей и адресов после инициализации ViewModel
-            Loaded += async () => await LoadRolesAndAddressesAsync();
+            RegisterCommand = new RelayCommand(async o => await RegisterAsync(o), o => !HasErrors);
+            AddAddressCommand = new RelayCommand(async o => await AddAddressAsync(o), o => true);
 
-            // Обновление CanExecute при изменении ошибок
-            this.ErrorsChanged += (s, e) =>
-            {
-                (RegisterCommand as RelayCommand)?.RaiseCanExecuteChanged();
-                (AddAddressCommand as RelayCommand)?.RaiseCanExecuteChanged();
-            };
+            // Инициализация данных
+            Task.Run(async () => await LoadRolesAndAddressesAsync());
         }
-
-        // Событие, которое вызывается при загрузке ViewModel
-        public event Func<Task> Loaded;
 
         public async Task LoadRolesAndAddressesAsync()
         {
@@ -269,24 +262,25 @@ namespace WpfApp.ViewModels
             catch (Exception ex)
             {
                 ErrorMessage = $"Error loading roles or addresses: {ex.Message}";
-                Console.WriteLine($"Ошибка при загрузке ролей или адресов: {ex}");
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    MessageBox.Show($"Error loading roles or addresses: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                });
             }
         }
 
-        private async Task RegisterAsync()
+        private async Task RegisterAsync(object parameter)
         {
             try
             {
+                // Проверка наличия ошибок валидации
                 ValidateAllProperties();
-                Console.WriteLine("Валидация завершена. HasErrors: " + HasErrors);
-                Console.WriteLine($"Password: {Password}");
-                Console.WriteLine($"ConfirmPassword: {ConfirmPassword}");
 
                 if (HasErrors)
                 {
-                    var errors = GetErrors(null).Cast<string>();
+                    var errors = GetAllErrors();
                     ErrorMessage = string.Join("\n", errors);
-                    Console.WriteLine("Ошибки валидации: " + ErrorMessage);
+                    MessageBox.Show($"Please fix the following errors:\n{ErrorMessage}", "Validation Errors", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
@@ -304,30 +298,27 @@ namespace WpfApp.ViewModels
                     RecoveryKeyword = this.RecoveryKeyword
                 };
 
-                Console.WriteLine("Создание пользователя: " + user.Login);
-
                 await _userService.RegisterUserAsync(user, Password);
                 MessageBox.Show("Registration successful!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-                Console.WriteLine("Пользователь успешно зарегистрирован.");
 
                 // Закрыть окно регистрации
-                Application.Current.Windows.OfType<Window>().SingleOrDefault(w => w.DataContext == this)?.Close();
+                var registerWindow = Application.Current.Windows.OfType<RegisterView>().FirstOrDefault();
+                registerWindow?.Close();
             }
             catch (Exception ex)
             {
                 ErrorMessage = $"Error registering user: {ex.Message}";
-                Console.WriteLine($"Исключение при регистрации: {ex}");
                 MessageBox.Show($"Error registering user: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private async Task AddAddressAsync()
+        private async Task AddAddressAsync(object parameter)
         {
             try
             {
                 // Получаем экземпляр AddAddressView через DI
                 var addAddressView = _serviceProvider.GetRequiredService<AddAddressView>();
-                addAddressView.Owner = Application.Current.MainWindow;
+                addAddressView.Owner = Application.Current.Windows.OfType<MainView>().FirstOrDefault();
                 bool? result = addAddressView.ShowDialog();
 
                 if (result == true)
@@ -348,9 +339,29 @@ namespace WpfApp.ViewModels
             catch (Exception ex)
             {
                 ErrorMessage = $"Error adding address: {ex.Message}";
-                Console.WriteLine($"Ошибка при добавлении адреса: {ex}");
                 MessageBox.Show($"Error adding address: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        /// <summary>
+        /// Получает все ошибки валидации для текущей модели.
+        /// </summary>
+        /// <returns>Список сообщений об ошибках.</returns>
+        private IEnumerable<string> GetAllErrors()
+        {
+            var errors = new List<string>();
+
+            var properties = GetType().GetProperties();
+            foreach (var property in properties)
+            {
+                var error = this[property.Name];
+                if (!string.IsNullOrEmpty(error))
+                {
+                    errors.Add(error);
+                }
+            }
+
+            return errors;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿// DataAccess/Interfaces/IRepository.cs
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace DataAccess.Interfaces

@@ -8,6 +8,7 @@ namespace WpfApp.Helpers
 {
     public class TextBoxPlaceholderVisibilityConverter : IValueConverter
     {
+        // Если текст пустой или null, отображаем плейсхолдер
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var text = value as string;

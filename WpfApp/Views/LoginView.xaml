@@ -52,10 +52,12 @@
             <StackPanel Orientation="Vertical" Margin="0,5">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Password:" Width="100" VerticalAlignment="Center"/>
-                    <PasswordBox Width="180"
-                                 helpers:PasswordBoxHelper.BindPassword="True"
-                                 helpers:PasswordBoxHelper.BoundPassword="{Binding Password, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                                 Tag="Password"/>
+                    <!-- Пример использования PasswordBox в LoginView.xaml -->
+                    <PasswordBox Width="250"
+             helpers:PasswordBoxBindingBehavior.BindPassword="True"
+             helpers:PasswordBoxBindingBehavior.BoundPassword="{Binding Password, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+             Tag="Password"/>
+
                 </StackPanel>
                 <TextBlock Text="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Mode=PreviousData}}"
                            Foreground="Red" FontSize="12"/>

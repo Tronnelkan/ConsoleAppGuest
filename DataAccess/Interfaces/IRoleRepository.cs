@@ -1,4 +1,7 @@
-﻿using Domain.Models;
+﻿// DataAccess/Interfaces/IRoleRepository.cs
+
+
+using Domain.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

@@ -10,7 +10,6 @@ namespace WpfApp.Views
         {
             InitializeComponent();
             this.DataContext = viewModel;
-            this.ContentRendered += async (s, e) => await viewModel.LoadRolesAndAddressesAsync();
         }
     }
 }

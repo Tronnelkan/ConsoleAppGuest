@@ -1,11 +1,13 @@
 ﻿// WpfApp/ViewModels/RecoveryPasswordViewModel.cs
 using BusinessLogic.Interfaces;
-using Domain.Models;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using WpfApp.Commands;
+using WpfApp.Views;
 
 namespace WpfApp.ViewModels
 {
@@ -15,22 +17,21 @@ namespace WpfApp.ViewModels
 
         public ICommand RecoverPasswordCommand { get; }
 
-        // Username
-        private string _username;
-        [Required(ErrorMessage = "Username is required.")]
-        public string Username
+        private string _email;
+        [Required(ErrorMessage = "Email is required.")]
+        [EmailAddress(ErrorMessage = "Invalid email format.")]
+        public string Email
         {
-            get => _username;
+            get => _email;
             set
             {
-                if (SetProperty(ref _username, value))
+                if (SetProperty(ref _email, value))
                 {
-                    ValidateProperty(value);
+                    OnPropertyChanged(nameof(Email));
                 }
             }
         }
 
-        // Recovery Keyword
         private string _recoveryKeyword;
         [Required(ErrorMessage = "Recovery Keyword is required.")]
         public string RecoveryKeyword
@@ -40,7 +41,7 @@ namespace WpfApp.ViewModels
             {
                 if (SetProperty(ref _recoveryKeyword, value))
                 {
-                    ValidateProperty(value);
+                    OnPropertyChanged(nameof(RecoveryKeyword));
                 }
             }
         }
@@ -56,24 +57,24 @@ namespace WpfApp.ViewModels
             {
                 if (SetProperty(ref _newPassword, value))
                 {
-                    ValidateProperty(value);
-                    ValidateProperty(ConfirmPassword, nameof(ConfirmPassword));
+                    OnPropertyChanged(nameof(NewPassword));
+                    OnPropertyChanged(nameof(ConfirmNewPassword));
                 }
             }
         }
 
-        // Confirm Password
-        private string _confirmPassword;
-        [Required(ErrorMessage = "Confirm Password is required.")]
+        // Confirm New Password
+        private string _confirmNewPassword;
+        [Required(ErrorMessage = "Confirm New Password is required.")]
         [Compare("NewPassword", ErrorMessage = "Passwords do not match.")]
-        public string ConfirmPassword
+        public string ConfirmNewPassword
         {
-            get => _confirmPassword;
+            get => _confirmNewPassword;
             set
             {
-                if (SetProperty(ref _confirmPassword, value))
+                if (SetProperty(ref _confirmNewPassword, value))
                 {
-                    ValidateProperty(value);
+                    OnPropertyChanged(nameof(ConfirmNewPassword));
                 }
             }
         }
@@ -89,46 +90,66 @@ namespace WpfApp.ViewModels
         public RecoveryPasswordViewModel(IUserService userService)
         {
             _userService = userService;
-            RecoverPasswordCommand = new RelayCommand(async o => await RecoverPasswordAsync(), o => !HasErrors);
-
-            // Обновление CanExecute при изменении ошибок
-            this.ErrorsChanged += (s, e) =>
-            {
-                (RecoverPasswordCommand as RelayCommand)?.RaiseCanExecuteChanged();
-            };
+            RecoverPasswordCommand = new RelayCommand(async o => await RecoverPasswordAsync(o), o => !HasErrors);
         }
 
-        private async Task RecoverPasswordAsync()
+        private async Task RecoverPasswordAsync(object parameter)
         {
             try
             {
+                // Проверка наличия ошибок валидации
                 ValidateAllProperties();
 
                 if (HasErrors)
                 {
-                    var errors = GetErrors(null).Cast<string>();
+                    var errors = GetAllErrors();
                     ErrorMessage = string.Join("\n", errors);
+                    MessageBox.Show($"Please fix the following errors:\n{ErrorMessage}", "Validation Errors", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
                 // Логика восстановления пароля
-                bool success = await _userService.RecoverPasswordAsync(Username, RecoveryKeyword, NewPassword);
+                bool isSuccess = await _userService.RecoverPasswordAsync(Email, RecoveryKeyword, NewPassword);
 
-                if (success)
+                if (isSuccess)
                 {
-                    MessageBox.Show("Password successfully recovered!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show("Password recovered successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+
                     // Закрыть окно восстановления пароля
-                    Application.Current.Windows.OfType<Window>().SingleOrDefault(w => w.DataContext == this)?.Close();
+                    var recoveryPasswordWindow = Application.Current.Windows.OfType<RecoveryPasswordView>().FirstOrDefault();
+                    recoveryPasswordWindow?.Close();
                 }
                 else
                 {
-                    ErrorMessage = "Invalid username or recovery keyword.";
+                    MessageBox.Show("Failed to recover password. Please check your email and recovery keyword.", "Failure", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
             catch (Exception ex)
             {
                 ErrorMessage = $"Error recovering password: {ex.Message}";
+                MessageBox.Show($"Error recovering password: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        /// <summary>
+        /// Получает все ошибки валидации для текущей модели.
+        /// </summary>
+        /// <returns>Список сообщений об ошибках.</returns>
+        private IEnumerable<string> GetAllErrors()
+        {
+            var errors = new List<string>();
+
+            var properties = GetType().GetProperties();
+            foreach (var property in properties)
+            {
+                var error = this[property.Name];
+                if (!string.IsNullOrEmpty(error))
+                {
+                    errors.Add(error);
+                }
+            }
+
+            return errors;
         }
     }
 }

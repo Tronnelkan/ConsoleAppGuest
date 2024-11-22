@@ -32,9 +32,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
-        <!-- Конвертер видимости для плейсхолдеров -->
-        <helpers:PlaceholderVisibilityConverter x:Key="PlaceholderVisibilityConverter"/>
     </Window.Resources>
     <Grid>
         <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -45,8 +42,9 @@
                 <StackPanel Orientation="Vertical" Margin="0,5">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Username:" Width="150" VerticalAlignment="Center"/>
-                        <TextBox Text="{Binding Username, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                                 Width="250"/>
+                        <TextBox Width="250"
+                                 Text="{Binding Username, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                                 Tag="Username"/>
                     </StackPanel>
                     <TextBlock Text="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Mode=PreviousData}}"
                                Foreground="Red" FontSize="12"/>
@@ -56,8 +54,9 @@
                 <StackPanel Orientation="Vertical" Margin="0,5">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Email:" Width="150" VerticalAlignment="Center"/>
-                        <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                                 Width="250"/>
+                        <TextBox Width="250"
+                                 Text="{Binding Email, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                                 Tag="Email"/>
                     </StackPanel>
                     <TextBlock Text="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Mode=PreviousData}}"
                                Foreground="Red" FontSize="12"/>
@@ -67,8 +66,9 @@
                 <StackPanel Orientation="Vertical" Margin="0,5">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="First Name:" Width="150" VerticalAlignment="Center"/>
-                        <TextBox Text="{Binding FirstName, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                                 Width="250"/>
+                        <TextBox Width="250"
+                                 Text="{Binding FirstName, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                                 Tag="FirstName"/>
                     </StackPanel>
                     <TextBlock Text="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Mode=PreviousData}}"
                                Foreground="Red" FontSize="12"/>
@@ -78,8 +78,9 @@
                 <StackPanel Orientation="Vertical" Margin="0,5">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Last Name:" Width="150" VerticalAlignment="Center"/>
-                        <TextBox Text="{Binding LastName, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                                 Width="250"/>
+                        <TextBox Width="250"
+                                 Text="{Binding LastName, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                                 Tag="LastName"/>
                     </StackPanel>
                     <TextBlock Text="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Mode=PreviousData}}"
                                Foreground="Red" FontSize="12"/>
@@ -89,9 +90,10 @@
                 <StackPanel Orientation="Vertical" Margin="0,5">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Gender:" Width="150" VerticalAlignment="Center"/>
-                        <ComboBox ItemsSource="{Binding Genders}"
-                                  SelectedItem="{Binding Gender, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                                  Width="250"/>
+                        <ComboBox Width="250"
+                                  ItemsSource="{Binding Genders}"
+                                  SelectedItem="{Binding Gender, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                                  Tag="Gender"/>
                     </StackPanel>
                     <TextBlock Text="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Mode=PreviousData}}"
                                Foreground="Red" FontSize="12"/>
@@ -101,8 +103,9 @@
                 <StackPanel Orientation="Vertical" Margin="0,5">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Phone:" Width="150" VerticalAlignment="Center"/>
-                        <TextBox Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                                 Width="250"/>
+                        <TextBox Width="250"
+                                 Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                                 Tag="Phone"/>
                     </StackPanel>
                     <TextBlock Text="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Mode=PreviousData}}"
                                Foreground="Red" FontSize="12"/>
@@ -112,8 +115,9 @@
                 <StackPanel Orientation="Vertical" Margin="0,5">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Bank Card Data:" Width="150" VerticalAlignment="Center"/>
-                        <TextBox Text="{Binding BankCardData, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                                 Width="250"/>
+                        <TextBox Width="250"
+                                 Text="{Binding BankCardData, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                                 Tag="BankCardData"/>
                     </StackPanel>
                     <TextBlock Text="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Mode=PreviousData}}"
                                Foreground="Red" FontSize="12"/>
@@ -124,8 +128,8 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Password:" Width="150" VerticalAlignment="Center"/>
                         <PasswordBox Width="250"
-                                     helpers:PasswordBoxHelper.BindPassword="True"
-                                     helpers:PasswordBoxHelper.BoundPassword="{Binding Password, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                                     helpers:PasswordBoxBindingBehavior.BindPassword="True"
+                                     helpers:PasswordBoxBindingBehavior.BoundPassword="{Binding Password, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
                                      Tag="Password"/>
                     </StackPanel>
                     <TextBlock Text="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Mode=PreviousData}}"
@@ -137,9 +141,9 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Confirm Password:" Width="150" VerticalAlignment="Center"/>
                         <PasswordBox Width="250"
-                                     helpers:PasswordBoxHelper.BindPassword="True"
-                                     helpers:PasswordBoxHelper.BoundPassword="{Binding ConfirmPassword, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                                     Tag="Confirm Password"/>
+                                     helpers:PasswordBoxBindingBehavior.BindPassword="True"
+                                     helpers:PasswordBoxBindingBehavior.BoundPassword="{Binding ConfirmPassword, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                                     Tag="ConfirmPassword"/>
                     </StackPanel>
                     <TextBlock Text="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Mode=PreviousData}}"
                                Foreground="Red" FontSize="12"/>
@@ -149,35 +153,38 @@
                 <StackPanel Orientation="Vertical" Margin="0,5">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Recovery Keyword:" Width="150" VerticalAlignment="Center"/>
-                        <TextBox Text="{Binding RecoveryKeyword, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                                 Width="250"/>
+                        <TextBox Width="250"
+                                 Text="{Binding RecoveryKeyword, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                                 Tag="RecoveryKeyword"/>
                     </StackPanel>
                     <TextBlock Text="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Mode=PreviousData}}"
                                Foreground="Red" FontSize="12"/>
                 </StackPanel>
 
-                <!-- Role -->
+                <!-- Roles -->
                 <StackPanel Orientation="Vertical" Margin="0,5">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Role:" Width="150" VerticalAlignment="Center"/>
-                        <ComboBox ItemsSource="{Binding Roles}"
-                                  SelectedItem="{Binding SelectedRole, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                                  DisplayMemberPath="RoleName"
-                                  Width="250"/>
+                        <ComboBox Width="250"
+                                  ItemsSource="{Binding Roles}"
+                                  DisplayMemberPath="Name"
+                                  SelectedItem="{Binding SelectedRole, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                                  Tag="Role"/>
                     </StackPanel>
                     <TextBlock Text="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Mode=PreviousData}}"
                                Foreground="Red" FontSize="12"/>
                 </StackPanel>
 
-                <!-- Address -->
+                <!-- Addresses -->
                 <StackPanel Orientation="Vertical" Margin="0,5">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Address:" Width="150" VerticalAlignment="Center"/>
-                        <ComboBox ItemsSource="{Binding Addresses}"
-                                  SelectedItem="{Binding SelectedAddress, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                        <ComboBox Width="250"
+                                  ItemsSource="{Binding Addresses}"
                                   DisplayMemberPath="FullAddress"
-                                  Width="200"/>
-                        <Button Content="Add" Command="{Binding AddAddressCommand}" Width="50" Margin="5,0,0,0"/>
+                                  SelectedItem="{Binding SelectedAddress, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                                  Tag="Address"/>
+                        <Button Content="Add" Width="50" Margin="5,0,0,0" Command="{Binding AddAddressCommand}"/>
                     </StackPanel>
                     <TextBlock Text="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Mode=PreviousData}}"
                                Foreground="Red" FontSize="12"/>

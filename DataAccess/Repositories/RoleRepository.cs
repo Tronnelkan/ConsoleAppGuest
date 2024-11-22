@@ -1,4 +1,5 @@
-﻿using DataAccess.Interfaces;
+﻿// DataAccess/Repositories/RoleRepository.cs
+using DataAccess.Interfaces;
 using Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;

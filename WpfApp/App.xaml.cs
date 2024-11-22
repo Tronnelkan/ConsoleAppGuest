@@ -4,8 +4,8 @@ using BusinessLogic.Services;
 using DataAccess;
 using DataAccess.Interfaces;
 using DataAccess.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Windows;
 using WpfApp.DependencyInjection;
@@ -31,6 +31,9 @@ namespace WpfApp
         {
             string connectionString = "Host=localhost;Port=5433;Database=MICRO_DB;Username=postgres;Password=tatarinn";
 
+            // Удалено добавление логирования
+            // services.AddLogging(configure => configure.AddConsole());
+
             services.AddDataAccessServices(connectionString)
                     .AddBusinessLogicServices()
                     .AddViewModels()
@@ -39,12 +42,20 @@ namespace WpfApp
 
         protected override void OnStartup(StartupEventArgs e)
         {
-
-            // Запуск главного меню
+            // Запуск главного окна через DI
             var mainView = _serviceProvider.GetRequiredService<MainView>();
             mainView.Show();
 
             base.OnStartup(e);
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            if (_serviceProvider is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+            base.OnExit(e);
         }
     }
 }
