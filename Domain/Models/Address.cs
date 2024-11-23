@@ -1,26 +1,20 @@
-﻿// Domain/Models/Address.cs
-using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Models
 {
     public class Address
     {
-        [Key]
         public int AddressId { get; set; }
-
-        [Required]
         public string Street { get; set; }
-
-        [Required]
         public string City { get; set; }
-
-        [Required]
         public string Country { get; set; }
 
-        // Для отображения полного адреса в ComboBox
-        public string FullAddress => $"{Street}, {City}, {Country}";
-
-        // Navigation property
+        // Навігаційні властивості
         public ICollection<User> Users { get; set; }
+
+        // Властивість для відображення повної адреси
+        [NotMapped]
+        public string FullAddress => $"{Street}, {City}, {Country}";
     }
 }
