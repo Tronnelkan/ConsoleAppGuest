@@ -68,6 +68,11 @@ namespace CourseProject.BLL.Services
             return VerifyPassword(password, user.PasswordHash);
         }
 
+        public async Task<User> GetUserByEmailAsync(string email)
+        {
+            return await _userRepository.GetByEmailAsync(email);
+        }
+
         public async Task<bool> ResetPasswordAsync(string email, string recoveryKeyword, string newPassword)
         {
             var user = await _userRepository.GetByEmailAsync(email.Trim());
@@ -94,6 +99,27 @@ namespace CourseProject.BLL.Services
             }
 
             return true;
+        }
+
+        public async Task UpdateUserAsync(User user)
+        {
+            // Переконайтесь, що RecoveryKeyword не змінюється
+            var existingUser = await _userRepository.GetByIdAsync(user.UserId);
+            if (existingUser != null)
+            {
+                existingUser.Login = user.Login;
+                existingUser.Email = user.Email;
+                // Не змінюйте RecoveryKeyword та інші критичні поля
+                // Наприклад:
+                // existingUser.Role = user.Role;
+                // existingUser.Address = user.Address;
+
+                await _userRepository.UpdateUserAsync(existingUser);
+            }
+            else
+            {
+                throw new InvalidOperationException("Користувач не знайдений.");
+            }
         }
 
 

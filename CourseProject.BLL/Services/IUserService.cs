@@ -13,6 +13,7 @@ namespace CourseProject.BLL.Services
         Task<bool> AuthenticateAsync(string login, string password);
         Task<bool> ResetPasswordAsync(string email, string recoveryKeyword, string newPassword);
         Task DeleteUserAsync(int userId);
-        // Додаткові методи за потреби
+        Task UpdateUserAsync(User user);
+        Task<User> GetUserByEmailAsync(string email);
     }
 }

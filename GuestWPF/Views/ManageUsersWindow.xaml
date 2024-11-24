@@ -3,8 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Керування Користувачами" Height="450" Width="800">
     <Grid>
-        <DataGrid ItemsSource="{Binding Users}" AutoGenerateColumns="False" CanUserAddRows="False" Margin="10">
-            <DataGrid.Columns>
+        <DataGrid ItemsSource="{Binding Users}" 
+                  SelectedItem="{Binding SelectedUser, Mode=TwoWay}" 
+                  AutoGenerateColumns="False" 
+                  CanUserAddRows="False" 
+                  Margin="10">            <DataGrid.Columns>
                 <DataGridTextColumn Header="ID" Binding="{Binding UserId}" Width="50"/>
                 <DataGridTextColumn Header="Логін" Binding="{Binding Login}" Width="*"/>
                 <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="*"/>
@@ -23,6 +26,6 @@
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
-        <Button Content="Оновити" Command="{Binding RefreshCommand}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10" Width="100" Height="30" Style="{StaticResource PrimaryButtonStyle}"/>
+        <Button Content="Зберегти Зміни" Command="{Binding SaveUserCommand}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10" Width="150"/>
     </Grid>
 </Window>

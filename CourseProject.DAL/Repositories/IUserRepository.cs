@@ -7,5 +7,7 @@ namespace CourseProject.DAL.Repositories
     {
         Task<User> GetByLoginAsync(string login);
         Task<User> GetByEmailAsync(string email);
+        Task UpdateUserAsync(User user);
+
     }
 }

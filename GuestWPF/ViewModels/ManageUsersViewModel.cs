@@ -1,10 +1,12 @@
-﻿using CourseProject.BLL.Services;
-using Domain.Models;
-using GuestWPF.Commands;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
+using GuestWPF.Commands;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using CourseProject.BLL.Services;
+using Domain.Models;
+using System.Windows;
 
 namespace GuestWPF.ViewModels
 {
@@ -12,52 +14,64 @@ namespace GuestWPF.ViewModels
     {
         private readonly IUserService _userService;
 
-        public ObservableCollection<User> Users { get; set; }
+        private ObservableCollection<User> _users;
+        public ObservableCollection<User> Users
+        {
+            get => _users;
+            set
+            {
+                _users = value;
+                OnPropertyChanged();
+            }
+        }
 
-        public ICommand RefreshCommand { get; }
-        public ICommand DeleteUserCommand { get; }
+        private User _selectedUser;
+        public User SelectedUser
+        {
+            get => _selectedUser;
+            set
+            {
+                _selectedUser = value;
+                OnPropertyChanged();
+                ((RelayCommand)SaveUserCommand).RaiseCanExecuteChanged();
+            }
+        }
+
+        public ICommand SaveUserCommand { get; }
+        public ICommand LoadUsersCommand { get; }
 
         public ManageUsersViewModel(IUserService userService)
         {
             _userService = userService;
-            Users = new ObservableCollection<User>();
-            RefreshCommand = new RelayCommand(async _ => await LoadUsers());
-            DeleteUserCommand = new RelayCommand(async user => await DeleteUser(user as User), user => user != null);
-
-            // Завантаження користувачів при ініціалізації
-            Task.Run(async () => await LoadUsers());
+            SaveUserCommand = new RelayCommand(async _ => await SaveUserAsync(), _ => CanSaveUser());
+            LoadUsersCommand = new RelayCommand(async _ => await LoadUsersAsync(), _ => true);
+            _ = LoadUsersAsync(); // Завантажити користувачів при ініціалізації
         }
 
-        private async Task LoadUsers()
+        private bool CanSaveUser()
+        {
+            return SelectedUser != null && !string.IsNullOrWhiteSpace(SelectedUser.Email);
+        }
+
+        private async Task LoadUsersAsync()
         {
             var users = await _userService.GetAllUsersAsync();
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                Users.Clear();
-                foreach (var user in users)
-                {
-                    Users.Add(user);
-                }
-            });
+            Users = new ObservableCollection<User>(users);
         }
 
-        private async Task DeleteUser(User user)
+        private async Task SaveUserAsync()
         {
-            if (user != null)
+            if (SelectedUser != null)
             {
-                var result = MessageBox.Show($"Ви впевнені, що хочете видалити користувача '{user.Login}'?", "Підтвердження", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (result == MessageBoxResult.Yes)
+                try
                 {
-                    try
-                    {
-                        await _userService.DeleteUserAsync(user.UserId);
-                        Users.Remove(user);
-                        MessageBox.Show("Користувача видалено.", "Успіх", MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
-                    catch (System.Exception ex)
-                    {
-                        MessageBox.Show($"Сталася помилка: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
+                    await _userService.UpdateUserAsync(SelectedUser);
+                    // Можливо, додати повідомлення про успішне збереження
+                }
+                catch (Exception ex)
+                {
+                    // Обробка помилок
+                    MessageBox.Show($"Помилка при збереженні користувача: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }

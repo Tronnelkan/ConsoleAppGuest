@@ -5,13 +5,16 @@ VisualStudioVersion = 17.11.35312.102
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain", "Domain\Domain.csproj", "{6E87CBCF-A390-4788-A382-40CE8076E76B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GuestWPF", "GuestWPF\GuestWPF.csproj", "{FCC79231-E001-4736-9BF7-2D6F1AC32F69}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GuestWPF", "GuestWPF\GuestWPF.csproj", "{FCC79231-E001-4736-9BF7-2D6F1AC32F69}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CourseProject.BLL", "CourseProject.BLL\CourseProject.BLL.csproj", "{5571806A-498F-42CC-B4D3-74A5A1D3DA93}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CourseProject.BLL", "CourseProject.BLL\CourseProject.BLL.csproj", "{5571806A-498F-42CC-B4D3-74A5A1D3DA93}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CourseProject.Tests", "CourseProject.Tests\CourseProject.Tests.csproj", "{CD494E50-1E0D-42ED-8969-DFC49773B706}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CourseProject.Tests", "CourseProject.Tests\CourseProject.Tests.csproj", "{CD494E50-1E0D-42ED-8969-DFC49773B706}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5571806A-498F-42CC-B4D3-74A5A1D3DA93} = {5571806A-498F-42CC-B4D3-74A5A1D3DA93}
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CourseProject.DAL", "CourseProject.DAL\CourseProject.DAL.csproj", "{2A119C53-16D1-422B-8840-5EBFA68DCAF5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CourseProject.DAL", "CourseProject.DAL\CourseProject.DAL.csproj", "{2A119C53-16D1-422B-8840-5EBFA68DCAF5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
