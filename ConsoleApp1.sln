@@ -16,6 +16,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CourseProject.Tests", "Cour
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CourseProject.DAL", "CourseProject.DAL\CourseProject.DAL.csproj", "{2A119C53-16D1-422B-8840-5EBFA68DCAF5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CourseProject.Web", "CourseProject.Web\CourseProject.Web.csproj", "{3944A9CB-88FF-4F77-AA97-584F8A0817C5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2A119C53-16D1-422B-8840-5EBFA68DCAF5} = {2A119C53-16D1-422B-8840-5EBFA68DCAF5}
+		{5571806A-498F-42CC-B4D3-74A5A1D3DA93} = {5571806A-498F-42CC-B4D3-74A5A1D3DA93}
+		{6E87CBCF-A390-4788-A382-40CE8076E76B} = {6E87CBCF-A390-4788-A382-40CE8076E76B}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,6 +49,10 @@ Global
 		{2A119C53-16D1-422B-8840-5EBFA68DCAF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2A119C53-16D1-422B-8840-5EBFA68DCAF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2A119C53-16D1-422B-8840-5EBFA68DCAF5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3944A9CB-88FF-4F77-AA97-584F8A0817C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3944A9CB-88FF-4F77-AA97-584F8A0817C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3944A9CB-88FF-4F77-AA97-584F8A0817C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3944A9CB-88FF-4F77-AA97-584F8A0817C5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -63,9 +63,23 @@ namespace CourseProject.BLL.Services
         public async Task<bool> AuthenticateAsync(string login, string password)
         {
             var user = await _userRepository.GetByLoginAsync(login);
-            if (user == null) return false;
+            if (user == null)
+            {
+                Console.Write("Користувач з логіном {Login} не знайдений.", login);
+                return false;
+            }
 
-            return VerifyPassword(password, user.PasswordHash);
+            var hashedPassword = ComputeHash(password);
+            if (user.PasswordHash == hashedPassword)
+            {
+                Console.Write("Користувач {Login} успішно автентифікований.", login);
+                return true;
+            }
+            else
+            {
+                Console.Write("Невірний пароль для користувача {Login}.", login);
+                return false;
+            }
         }
 
         public async Task<User> GetUserByEmailAsync(string email)
