@@ -17,7 +17,17 @@ namespace CourseProject.BLL.Services
 
         public async Task<IEnumerable<Role>> GetAllRolesAsync()
         {
-            return await _roleRepository.GetAllAsync();
+            Console.WriteLine("Початок методу GetAllRolesAsync у RoleService.");
+            var roles = await _roleRepository.GetAllAsync();
+            if (roles == null || !roles.Any())
+            {
+                Console.WriteLine("Немає доступних ролей у базі даних.");
+            }
+            else
+            {
+                Console.WriteLine($"Отримано {roles.Count()} ролей у RoleService.");
+            }
+            return roles;
         }
 
         public async Task<Role> GetRoleByIdAsync(int id)

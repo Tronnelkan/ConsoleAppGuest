@@ -1,60 +1,52 @@
-﻿@model CourseProject.Web.Models.UserViewModel
+﻿@model CourseProject.Web.ViewModels.UserViewModel
 
 @{
     ViewData["Title"] = "Деталі Користувача";
 }
 
-<h1>Деталі Користувача</h1>
+<h1 class="mb-4">Деталі Користувача</h1>
 
-<div>
-    <h4>Користувач</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            Логін
-        </dt>
-        <dd class="col-sm-10">
-            @Model.Login
-        </dd>
-        <dt class="col-sm-2">
-            Ім'я
-        </dt>
-        <dd class="col-sm-10">
-            @Model.FirstName
-        </dd>
-        <dt class="col-sm-2">
-            Прізвище
-        </dt>
-        <dd class="col-sm-10">
-            @Model.LastName
-        </dd>
-        <dt class="col-sm-2">
-            Email
-        </dt>
-        <dd class="col-sm-10">
-            @Model.Email
-        </dd>
-        <dt class="col-sm-2">
-            Телефон
-        </dt>
-        <dd class="col-sm-10">
-            @Model.Phone
-        </dd>
-        <dt class="col-sm-2">
-            Роль
-        </dt>
-        <dd class="col-sm-10">
-            @Model.RoleName
-        </dd>
-        <dt class="col-sm-2">
-            Адреса
-        </dt>
-        <dd class="col-sm-10">
-            @Model.Address
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.UserId" class="btn btn-warning">Редагувати</a>
-    <a asp-action="Index" class="btn btn-secondary">Назад до Списку</a>
+<div class="card">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0">@Model.Login</h5>
+    </div>
+    <div class="card-body">
+        <table class="table table-bordered">
+            <tr>
+                <th>Ім'я</th>
+                <td>@Model.FirstName</td>
+            </tr>
+            <tr>
+                <th>Прізвище</th>
+                <td>@Model.LastName</td>
+            </tr>
+            <tr>
+                <th>Стать</th>
+                <td>@Model.Gender</td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td>@Model.Email</td>
+            </tr>
+            <tr>
+                <th>Телефон</th>
+                <td>@Model.Phone</td>
+            </tr>
+            <tr>
+                <th>Роль</th>
+                <td>@Model.RoleName</td>
+            </tr>
+            <tr>
+                <th>Адреса</th>
+                <td>@Model.Address</td>
+            </tr>
+            <tr>
+                <th>Дані банківської картки</th>
+                <td>@Model.BankCardData</td>
+            </tr>
+        </table>
+        <a href="@Url.Action("Edit", "Users", new { id = Model.UserId })" class="btn btn-warning">Редагувати</a>
+        <a href="@Url.Action("Delete", "Users", new { id = Model.UserId })" class="btn btn-danger">Видалити</a>
+        <a href="@Url.Action("Index", "Users")" class="btn btn-secondary">Назад до списку</a>
+    </div>
 </div>

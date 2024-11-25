@@ -1,77 +1,93 @@
-﻿@model CourseProject.Web.Models.UserViewModel
+﻿@model CourseProject.Web.ViewModels.UserViewModel
 
 @{
-    ViewData["Title"] = "Редагувати Користувача";
+    ViewData["Title"] = "Редагування Користувача";
 }
 
-<h1>Редагувати Користувача</h1>
+<h1 class="mb-4">Редагування Користувача</h1>
 
-<form asp-action="Edit" method="post">
-    <input type="hidden" asp-for="UserId" />
-    <div asp-validation-summary="All" class="text-danger"></div>
+<form method="post" action="@Url.Action("Edit", "Users", new { id = Model.UserId })" class="mt-4">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="UserId" value="@Model.UserId" />
+
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label for="Login" class="font-weight-bold">Логін</label>
+            @Html.TextBoxFor(m => m.Login, new { @class = "form-control", placeholder = "Введіть логін" })
+            <span class="text-danger">@Html.ValidationMessageFor(m => m.Login)</span>
+        </div>
+        <div class="form-group col-md-6">
+            <label for="Email" class="font-weight-bold">Email</label>
+            @Html.TextBoxFor(m => m.Email, new { @class = "form-control", placeholder = "Введіть Email", type = "email" })
+            <span class="text-danger">@Html.ValidationMessageFor(m => m.Email)</span>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label for="FirstName" class="font-weight-bold">Ім'я</label>
+            @Html.TextBoxFor(m => m.FirstName, new { @class = "form-control", placeholder = "Введіть ім'я" })
+            <span class="text-danger">@Html.ValidationMessageFor(m => m.FirstName)</span>
+        </div>
+        <div class="form-group col-md-6">
+            <label for="LastName" class="font-weight-bold">Прізвище</label>
+            @Html.TextBoxFor(m => m.LastName, new { @class = "form-control", placeholder = "Введіть прізвище" })
+            <span class="text-danger">@Html.ValidationMessageFor(m => m.LastName)</span>
+        </div>
+    </div>
 
     <div class="form-group">
-        <label asp-for="Login" class="control-label"></label>
-        <input asp-for="Login" class="form-control" />
-        <span asp-validation-for="Login" class="text-danger"></span>
+        <label for="Gender" class="font-weight-bold">Стать</label>
+        @Html.DropDownListFor(m => m.Gender, new List<SelectListItem>
+        {
+        new SelectListItem { Text = "Оберіть стать", Value = "" },
+        new SelectListItem { Text = "Чоловіча", Value = "Male" },
+        new SelectListItem { Text = "Жіноча", Value = "Female" },
+        new SelectListItem { Text = "Інша", Value = "Other" }
+        }, new { @class = "form-control" })
+        <span class="text-danger">@Html.ValidationMessageFor(m => m.Gender)</span>
     </div>
+
     <div class="form-group">
-        <label asp-for="Password" class="control-label"></label>
-        <input asp-for="Password" class="form-control" type="password" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-        <small class="form-text text-muted">Залиште поле порожнім, якщо не хочете змінювати пароль.</small>
+        <select name="RoleName" id="RoleName" class="form-control">
+            <option value="">Оберіть роль</option>
+            @if (Model.Roles != null && Model.Roles.Any())
+            {
+                foreach (var role in Model.Roles)
+                {
+                    <option value="@role.Value" @(role.Value == Model.RoleName ? "selected" : "")>@role.Text</option>
+                }
+            }
+            else
+            {
+                <option disabled>Немає доступних ролей</option>
+            }
+        </select>
+        <span class="text-danger">@Html.ValidationMessageFor(m => m.RoleName)</span>
     </div>
+
     <div class="form-group">
-        <label asp-for="ConfirmPassword" class="control-label"></label>
-        <input asp-for="ConfirmPassword" class="form-control" type="password" />
-        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+        <label for="Phone" class="font-weight-bold">Телефон</label>
+        @Html.TextBoxFor(m => m.Phone, new { @class = "form-control", placeholder = "+380XXXXXXXXX", type = "tel" })
+        <span class="text-danger">@Html.ValidationMessageFor(m => m.Phone)</span>
     </div>
+
     <div class="form-group">
-        <label asp-for="FirstName" class="control-label"></label>
-        <input asp-for="FirstName" class="form-control" />
-        <span asp-validation-for="FirstName" class="text-danger"></span>
+        <label for="Address" class="font-weight-bold">Адреса</label>
+        @Html.TextBoxFor(m => m.Address, new { @class = "form-control", placeholder = "Вулиця, Місто, Країна" })
+        <span class="text-danger">@Html.ValidationMessageFor(m => m.Address)</span>
     </div>
+
     <div class="form-group">
-        <label asp-for="LastName" class="control-label"></label>
-        <input asp-for="LastName" class="form-control" />
-        <span asp-validation-for="LastName" class="text-danger"></span>
+        <label for="BankCardData" class="font-weight-bold">Дані банківської картки</label>
+        @Html.TextBoxFor(m => m.BankCardData, new { @class = "form-control", placeholder = "XXXX-XXXX-XXXX-XXXX" })
+        <span class="text-danger">@Html.ValidationMessageFor(m => m.BankCardData)</span>
     </div>
-    <div class="form-group">
-        <label asp-for="Gender" class="control-label"></label>
-        <input asp-for="Gender" class="form-control" />
-        <span asp-validation-for="Gender" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Email" class="control-label"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Phone" class="control-label"></label>
-        <input asp-for="Phone" class="form-control" />
-        <span asp-validation-for="Phone" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="BankCardData" class="control-label"></label>
-        <input asp-for="BankCardData" class="form-control" />
-        <span asp-validation-for="BankCardData" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label class="control-label">Роль</label>
-        <input type="text" class="form-control" value="@Model.RoleName" readonly />
-    </div>
-    <div class="form-group">
-        <label class="control-label">Адреса</label>
-        <input type="text" class="form-control" value="@Model.Address" readonly />
-    </div>
-    <div class="form-group">
-        <input type="submit" value="Зберегти" class="btn btn-primary" />
-        <a asp-action="Index" class="btn btn-secondary">Скасувати</a>
-    </div>
+
+    <button type="submit" class="btn btn-primary">Оновити</button>
+    <a href="@Url.Action("Index", "Users")" class="btn btn-secondary">Скасувати</a>
 </form>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 }

@@ -1,0 +1,35 @@
+﻿@model IEnumerable<CourseProject.Web.ViewModels.AddressViewModel>
+
+@{
+    ViewData["Title"] = "Список Адрес";
+}
+
+<h1 class="mb-4">Список Адрес</h1>
+
+<a href="@Url.Action("Create", "Address")" class="btn btn-primary mb-3">Створити Адресу</a>
+
+<table class="table table-bordered table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>Вулиця</th>
+            <th>Місто</th>
+            <th>Країна</th>
+            <th>Дії</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var address in Model)
+        {
+            <tr>
+                <td>@address.Street</td>
+                <td>@address.City</td>
+                <td>@address.Country</td>
+                <td>
+                    <a href="@Url.Action("Details", "Address", new { id = address.AddressId })" class="btn btn-info btn-sm">Деталі</a>
+                    <a href="@Url.Action("Edit", "Address", new { id = address.AddressId })" class="btn btn-warning btn-sm">Редагувати</a>
+                    <a href="@Url.Action("Delete", "Address", new { id = address.AddressId })" class="btn btn-danger btn-sm">Видалити</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

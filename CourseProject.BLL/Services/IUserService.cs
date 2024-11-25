@@ -15,5 +15,7 @@ namespace CourseProject.BLL.Services
         Task DeleteUserAsync(int userId);
         Task UpdateUserAsync(User user);
         Task<User> GetUserByEmailAsync(string email);
+        Task<User> AddUserAsync(User user);
+
     }
 }

@@ -1,15 +1,13 @@
-﻿using AutoMapper;
+﻿// CourseProject.Web/Controllers/AccountController.cs
+using Microsoft.AspNetCore.Mvc;
+using CourseProject.Web.ViewModels;
 using CourseProject.BLL.Services;
-using CourseProject.Web.Models;
+using AutoMapper;
 using Domain.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
 using System.Security.Claims;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CourseProject.Web.Controllers
 {
@@ -26,72 +24,129 @@ namespace CourseProject.Web.Controllers
             _logger = logger;
         }
 
-        // GET: Account/Login
+        // GET: Account/Register
         [AllowAnonymous]
-        public IActionResult Login()
+        public IActionResult Register()
         {
             return View();
         }
 
-        // POST: Account/Login
+        // POST: Account/Register
         [HttpPost]
-        [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
+        [AllowAnonymous]
+        public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                _logger.LogWarning("ModelState не валідний при спробі логіну. Помилки: {Errors}",
-                    string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
-                return View(model);
-            }
-
-            var isAuthenticated = await _userService.AuthenticateAsync(model.Login, model.Password);
-            if (isAuthenticated)
-            {
-                var user = await _userService.GetUserByLoginAsync(model.Login);
-                var claims = new List<Claim>
+                try
                 {
-                    new Claim(ClaimTypes.Name, user.Login),
-                    new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-                    new Claim(ClaimTypes.Role, user.Role.RoleName)
-                };
-
-                var claimsIdentity = new ClaimsIdentity(
-                    claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-                var authProperties = new AuthenticationProperties
+                    var user = _mapper.Map<User>(model);
+                    await _userService.RegisterUserAsync(user, model.Password);
+                    TempData["SuccessMessage"] = "Реєстрація успішна! Будь ласка, увійдіть.";
+                    return RedirectToAction(nameof(Login));
+                }
+                catch (ArgumentException ex)
                 {
-                    IsPersistent = true // Завжди запам'ятовувати користувача
-                };
-
-                await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity),
-                    authProperties);
-
-                _logger.LogInformation("Користувач {Login} успішно увійшов у систему.", model.Login);
-
-                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                    return Redirect(returnUrl);
-                else
-                    return RedirectToAction("Index", "Home");
+                    _logger.LogError(ex, "Помилка під час реєстрації користувача.");
+                    ModelState.AddModelError("", ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Неочікувана помилка під час реєстрації користувача.");
+                    ModelState.AddModelError("", "Сталася помилка під час реєстрації. Спробуйте пізніше.");
+                }
             }
-
-            _logger.LogWarning("Невдала спроба логіну для користувача {Login}", model.Login);
-            ModelState.AddModelError(string.Empty, "Невірний логін або пароль.");
+            // Якщо модель не валідна або сталася помилка, повертаємо форму з введеними даними
             return View(model);
         }
+
+
+        // GET: Account/Login
+        [AllowAnonymous]
+        public IActionResult Login()
+        {
+            _logger.LogInformation("Ініціалізація представлення логіну.");
+            return View(new LoginViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AllowAnonymous]
+        public async Task<IActionResult> Login(LoginViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var isAuthenticated = await _userService.AuthenticateAsync(model.Login, model.Password);
+
+                if (isAuthenticated)
+                {
+                    // Створіть ClaimsIdentity
+                    var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, model.Login),
+                new Claim(ClaimTypes.Role, "User") // Ви можете динамічно визначати роль
+            };
+
+                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                    // Створіть Cookie
+                    await HttpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        new ClaimsPrincipal(claimsIdentity),
+                        new AuthenticationProperties
+                        {
+                            IsPersistent = model.RememberMe, // "Запам’ятати мене"
+                            ExpiresUtc = DateTime.UtcNow.AddDays(30) // Наприклад, на 30 днів
+                        });
+
+                    TempData["SuccessMessage"] = "Вхід виконано успішно!";
+                    return RedirectToAction("Index", "Users");
+                }
+
+                ModelState.AddModelError("", "Невірний логін або пароль.");
+            }
+
+            return View(model);
+        }
+
+
+
 
         // POST: Account/Logout
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme);
-            _logger.LogInformation("Користувач {Name} вийшов з системи.", User.Identity.Name);
-            return RedirectToAction("Login", "Account");
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            TempData["SuccessMessage"] = "Ви успішно вийшли.";
+            return RedirectToAction("Index", "Home");
+        }
+
+        // GET: Account/ForgotPassword
+        [AllowAnonymous]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        // POST: Account/ForgotPassword
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AllowAnonymous]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var isReset = await _userService.ResetPasswordAsync(model.Email, model.RecoveryKeyword, model.NewPassword);
+                if (isReset)
+                {
+                    TempData["SuccessMessage"] = "Пароль успішно скинуто! Ви можете увійти з новим паролем.";
+                    return RedirectToAction(nameof(Login));
+                }
+                ModelState.AddModelError("", "Не вдалося скинути пароль. Перевірте Email та Recovery Keyword.");
+            }
+            return View(model);
         }
 
         // GET: Account/AccessDenied
@@ -99,5 +154,7 @@ namespace CourseProject.Web.Controllers
         {
             return View();
         }
+
+        // Додайте інші дії за потребою
     }
 }

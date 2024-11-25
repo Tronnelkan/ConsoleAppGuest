@@ -1,32 +1,23 @@
-﻿@model CourseProject.Web.Models.LoginViewModel
+﻿@model CourseProject.Web.ViewModels.LoginViewModel
 
 @{
     ViewData["Title"] = "Логін";
 }
 
-<h1>Логін</h1>
+<h1 class="mb-4">Логін</h1>
 
 <form asp-action="Login" method="post">
     @Html.AntiForgeryToken()
-    <div asp-validation-summary="All" class="text-danger"></div>
+    <input name="Login" type="text" class="form-control" placeholder="Введіть логін" />
+    <input name="Password" type="password" class="form-control" placeholder="Введіть пароль" />
+    <input type="checkbox" name="RememberMe" id="RememberMe" class="form-check-input" value="true" />
+    <input type="hidden" name="RememberMe" value="false" />
+    <label for="RememberMe" class="form-check-label">Запам'ятати мене</label>
 
-    <div class="form-group">
-        <label asp-for="Login" class="control-label"></label>
-        <input asp-for="Login" class="form-control" />
-        <span asp-validation-for="Login" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Password" class="control-label"></label>
-        <input asp-for="Password" class="form-control" type="password" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <input type="submit" value="Увійти" class="btn btn-primary" />
-    </div>
+    <button type="submit">Увійти</button>
 </form>
 
+
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 }

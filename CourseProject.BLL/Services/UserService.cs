@@ -23,8 +23,44 @@ namespace CourseProject.BLL.Services
 
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
-            return await _userRepository.GetAllAsync();
+            var users = await _userRepository.GetAllAsync();
+
+            foreach (var user in users)
+            {
+                if (user == null) continue;
+
+                // Завантаження адреси
+                if (user.AddressId > 0)
+                {
+                    try
+                    {
+                        var address = await _addressRepository.GetByIdAsync(user.AddressId);
+                        user.AddressEntity = address;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error while fetching address with ID {user.AddressId}: {ex.Message}");
+                    }
+                }
+
+                // Завантаження ролі
+                if (user.RoleId > 0)
+                {
+                    try
+                    {
+                        var role = await _roleRepository.GetByIdAsync(user.RoleId);
+                        user.Role = role;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error while fetching role with ID {user.RoleId}: {ex.Message}");
+                    }
+                }
+            }
+
+            return users;
         }
+
 
         public async Task<User> GetUserByIdAsync(int id)
         {
@@ -54,6 +90,19 @@ namespace CourseProject.BLL.Services
             if (string.IsNullOrWhiteSpace(user.RecoveryKeyword))
                 throw new ArgumentException("Recovery Keyword не може бути порожнім.");
 
+            if (user.RoleId == 0) // Якщо RoleId не передано
+            {
+                var guestRole = await _roleRepository.GetByNameAsync("Guest");
+                if (guestRole == null)
+                {
+                    // Якщо роль "Guest" відсутня, створіть її
+                    guestRole = new Role { RoleName = "Guest" };
+                    await _roleRepository.AddAsync(guestRole);
+                    await _roleRepository.SaveChangesAsync();
+                }
+                user.RoleId = guestRole.RoleId;
+            }
+
             await _userRepository.AddAsync(user);
             await _userRepository.SaveChangesAsync();
 
@@ -65,19 +114,19 @@ namespace CourseProject.BLL.Services
             var user = await _userRepository.GetByLoginAsync(login);
             if (user == null)
             {
-                Console.Write("Користувач з логіном {Login} не знайдений.", login);
+                Console.WriteLine($"Користувач з логіном {login} не знайдений.");
                 return false;
             }
 
             var hashedPassword = ComputeHash(password);
             if (user.PasswordHash == hashedPassword)
             {
-                Console.Write("Користувач {Login} успішно автентифікований.", login);
+                Console.WriteLine($"Користувач {login} успішно автентифікований.");
                 return true;
             }
             else
             {
-                Console.Write("Невірний пароль для користувача {Login}.", login);
+                Console.WriteLine($"Невірний пароль для користувача {login}.");
                 return false;
             }
         }
@@ -176,6 +225,26 @@ namespace CourseProject.BLL.Services
                     builder.Append(b.ToString("x2"));
                 return builder.ToString();
             }
+        }
+
+        public async Task<User> AddUserAsync(User user)
+        {
+            // Перевірка наявності користувача
+            var existingUser = await _userRepository.GetByLoginAsync(user.Login);
+            if (existingUser != null)
+                throw new ArgumentException("Користувач з таким логіном вже існує.");
+
+            var existingEmail = await _userRepository.GetByEmailAsync(user.Email);
+            if (existingEmail != null)
+                throw new ArgumentException("Користувач з таким Email вже існує.");
+
+            // Хешування пароля, якщо це необхідно
+            user.PasswordHash = ComputeHash("defaultPassword"); // або інший спосіб
+
+            await _userRepository.AddAsync(user);
+            await _userRepository.SaveChangesAsync();
+
+            return user;
         }
 
         private bool VerifyPassword(string password, string hash)

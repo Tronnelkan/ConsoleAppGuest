@@ -13,6 +13,7 @@ namespace GuestWPF.ViewModels
     public class ManageUsersViewModel : BaseViewModel
     {
         private readonly IUserService _userService;
+        private readonly IAddressService _addressService;
 
         private ObservableCollection<User> _users;
         public ObservableCollection<User> Users
@@ -56,8 +57,45 @@ namespace GuestWPF.ViewModels
         private async Task LoadUsersAsync()
         {
             var users = await _userService.GetAllUsersAsync();
+
+            foreach (var user in users)
+            {
+                if (user == null)
+                {
+                    Console.WriteLine("User is null.");
+                    continue;
+                }
+
+                Console.WriteLine($"User: {user.Login}, AddressId: {user.AddressId}, RoleId: {user.RoleId}");
+
+                if (user.AddressEntity == null && user.AddressId > 0)
+                {
+                    try
+                    {
+                        var address = await _addressService.GetAddressByIdAsync(user.AddressId);
+                        if (address != null)
+                        {
+                            user.AddressEntity = address;
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Address with ID {user.AddressId} not found.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error while fetching address with ID {user.AddressId}: {ex.Message}");
+                    }
+                }
+            }
+
             Users = new ObservableCollection<User>(users);
         }
+
+
+
+
+
 
         private async Task SaveUserAsync()
         {

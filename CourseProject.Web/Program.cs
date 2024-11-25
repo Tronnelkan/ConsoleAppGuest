@@ -1,20 +1,24 @@
-using CourseProject.BLL.Services;
 using CourseProject.DAL.Data;
+using CourseProject.BLL.Services;
 using CourseProject.DAL.Repositories;
-using CourseProject.Web.Data;
-using CourseProject.Web.MappingProfiles;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Domain.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using AutoMapper;
+using CourseProject.Web.Mappings;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using FluentValidation.AspNetCore;
+using CourseProject.Web.ViewModels.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Додавання контролерів з представленнями
+// Додавання служб до контейнера DI
+//builder.Services.AddControllersWithViews()
+//    .AddFluentValidation(config =>
+//        config.RegisterValidatorsFromAssemblyContaining<RegisterViewModelValidator>());
 builder.Services.AddControllersWithViews();
 
-// Налаштування PostgreSQL для контексту
+
+// Налаштування DbContext
 builder.Services.AddDbContext<CourseProjectContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -28,10 +32,10 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
 
-// Налаштування AutoMapper
+// AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
-// Налаштування автентифікації за допомогою кукі
+// Аутентифікація та авторизація
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -39,16 +43,15 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/Account/AccessDenied";
     });
 
-// Додавання авторизаційних політик
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
-    options.AddPolicy("GuestOnly", policy => policy.RequireRole("Guest"));
+    // Додайте інші політики за потребою
 });
 
 var app = builder.Build();
 
-// Налаштування HTTP конвеєра
+// Налаштування конвеєра HTTP
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -60,24 +63,10 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// Додавання автентифікації та авторизації
+app.UseMiddleware<CourseProject.Web.Middleware.AuthorizationLoggingMiddleware>();
+
 app.UseAuthentication();
 app.UseAuthorization();
-
-// Ініціалізація бази даних
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
-    {
-        await DbInitializer.InitializeAsync(services);
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while seeding the database.");
-    }
-}
 
 app.MapControllerRoute(
     name: "default",

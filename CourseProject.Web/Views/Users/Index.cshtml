@@ -1,17 +1,15 @@
-﻿@model IEnumerable<CourseProject.Web.Models.UserViewModel>
+﻿@model IEnumerable<CourseProject.Web.ViewModels.UserViewModel>
 
 @{
-    ViewData["Title"] = "Користувачі";
+    ViewData["Title"] = "Список Користувачів";
 }
 
-<h1>Користувачі</h1>
+<h1 class="mb-4">Список Користувачів</h1>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Створити Нового Користувача</a>
-</p>
+<a href="@Url.Action("Create", "Users")" class="btn btn-primary mb-3">Створити Користувача</a>
 
 <table class="table table-bordered table-striped">
-    <thead>
+    <thead class="thead-dark">
         <tr>
             <th>Логін</th>
             <th>Ім'я</th>
@@ -26,20 +24,20 @@
     <tbody>
         @foreach (var user in Model)
         {
-            <tr>
-                <td>@user.Login</td>
-                <td>@user.FirstName</td>
-                <td>@user.LastName</td>
-                <td>@user.Email</td>
-                <td>@user.Phone</td>
-                <td>@user.RoleName</td>
-                <td>@user.Address</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@user.UserId" class="btn btn-sm btn-warning">Редагувати</a>
-                    <a asp-action="Details" asp-route-id="@user.UserId" class="btn btn-sm btn-info">Деталі</a>
-                    <a asp-action="Delete" asp-route-id="@user.UserId" class="btn btn-sm btn-danger">Видалити</a>
-                </td>
-            </tr>
+                <tr>
+                    <td>@user.Login</td>
+                    <td>@user.FirstName</td>
+                    <td>@user.LastName</td>
+                    <td>@user.Email</td>
+                    <td>@user.Phone</td>
+                    <td>@user.RoleName</td>
+                    <td>@user.Address</td>
+                    <td>
+                        <a href="@Url.Action("Details", "Users", new { id = user.UserId })" class="btn btn-info btn-sm">Деталі</a>
+                        <a href="@Url.Action("Edit", "Users", new { id = user.UserId })" class="btn btn-warning btn-sm">Редагувати</a>
+                        <a href="@Url.Action("Delete", "Users", new { id = user.UserId })" class="btn btn-danger btn-sm">Видалити</a>
+                    </td>
+                </tr>
         }
     </tbody>
 </table>

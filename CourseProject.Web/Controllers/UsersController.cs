@@ -1,11 +1,11 @@
-﻿using AutoMapper;
+﻿// CourseProject.Web/Controllers/UsersController.cs
+using Microsoft.AspNetCore.Mvc;
 using CourseProject.BLL.Services;
-using CourseProject.Web.Models;
+using CourseProject.Web.ViewModels;
+using AutoMapper;
 using Domain.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace CourseProject.Web.Controllers
 {
@@ -13,45 +13,96 @@ namespace CourseProject.Web.Controllers
     public class UsersController : Controller
     {
         private readonly IUserService _userService;
-        private readonly IMapper _mapper;
-        private readonly IRoleService _roleService;
         private readonly IAddressService _addressService;
+        private readonly IRoleService _roleService;
+        private readonly IMapper _mapper;
 
-        // Визначте дефолтні значення для RoleId та AddressId
-        private const int DefaultRoleId = 1; // "Guest"
-        private const int DefaultAddressId = 1; // Стандартна адреса
-
-        public UsersController(IUserService userService, IMapper mapper, IRoleService roleService, IAddressService addressService)
+        public UsersController(IUserService userService, IAddressService addressService, IRoleService roleService, IMapper mapper)
         {
-            _userService = userService;
-            _mapper = mapper;
-            _roleService = roleService;
-            _addressService = addressService;
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+            _addressService = addressService ?? throw new ArgumentNullException(nameof(addressService));
+            _roleService = roleService ?? throw new ArgumentNullException(nameof(roleService));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+
+            Console.WriteLine("UsersController: Залежності впроваджено.");
         }
+
 
         // GET: Users
-        [Authorize(Roles = "Admin")]
+        [Authorize()]
         public async Task<IActionResult> Index()
         {
+            Console.WriteLine("Початок дії Index.");
+
+            // Отримання користувачів
             var users = await _userService.GetAllUsersAsync();
-            var model = _mapper.Map<IEnumerable<UserViewModel>>(users);
-            return View(model);
+            var userViewModels = _mapper.Map<IEnumerable<UserViewModel>>(users);
+
+            // Отримання всіх ролей та адрес
+            var roles = await _roleService.GetAllRolesAsync();
+            var addresses = await _addressService.GetAllAddressesAsync();
+
+            foreach (var user in users)
+            {
+                var viewModel = userViewModels.FirstOrDefault(u => u.UserId == user.UserId);
+
+                if (viewModel != null)
+                {
+                    // Призначення RoleName
+                    var role = roles.FirstOrDefault(r => r.RoleId == user.RoleId);
+                    viewModel.RoleName = role?.RoleName ?? "Роль не призначена";
+
+                    // Призначення Address
+                    var address = addresses.FirstOrDefault(a => a.AddressId == user.AddressId);
+                    viewModel.Address = address != null
+                        ? $"{address.Street}, {address.City}, {address.Country}"
+                        : "Адреса не призначена";
+                }
+            }
+
+            Console.WriteLine($"Отримано {userViewModels.Count()} користувачів з ролями та адресами.");
+            return View(userViewModels);
         }
+
+
 
         // GET: Users/Details/5
-        [Authorize(Roles = "Admin,User")]
+        [Authorize()]
         public async Task<IActionResult> Details(int id)
         {
+            Console.WriteLine($"Початок дії Details для користувача з ID: {id}");
+
             var user = await _userService.GetUserByIdAsync(id);
             if (user == null)
+            {
+                Console.WriteLine($"Користувача з ID {id} не знайдено.");
                 return NotFound();
+            }
 
-            var model = _mapper.Map<UserViewModel>(user);
-            return View(model);
+            var userViewModel = _mapper.Map<UserViewModel>(user);
+
+            // Отримання ролі
+            var role = await _roleService.GetRoleByIdAsync(user.RoleId);
+            userViewModel.RoleName = role?.RoleName ?? "Роль не призначена";
+
+            // Отримання адреси
+            var address = await _addressService.GetAddressByIdAsync(user.AddressId);
+            if (address != null)
+            {
+                userViewModel.Address = $"{address.Street}, {address.City}, {address.Country}";
+            }
+            else
+            {
+                userViewModel.Address = "Адреса не призначена";
+            }
+
+            Console.WriteLine($"Деталі користувача: {userViewModel.Login}, роль: {userViewModel.RoleName}, адреса: {userViewModel.Address}.");
+            return View(userViewModel);
         }
 
+
         // GET: Users/Create
-        [Authorize(Roles = "Admin")]
+        [Authorize()]
         public IActionResult Create()
         {
             return View();
@@ -66,108 +117,237 @@ namespace CourseProject.Web.Controllers
             if (ModelState.IsValid)
             {
                 var user = _mapper.Map<User>(model);
-                user.RoleId = DefaultRoleId;
-                user.AddressId = DefaultAddressId;
-                user.RecoveryKeyword = "defaultRecovery"; // Ви можете змінити це значення або зробити поле вводу
-
-                try
-                {
-                    await _userService.RegisterUserAsync(user, model.Password);
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (System.ArgumentException ex)
-                {
-                    ModelState.AddModelError(string.Empty, ex.Message);
-                }
+                // Ви можете встановити RoleId, AddressId за потребою
+                await _userService.AddUserAsync(user); // Додайте відповідний метод у IUserService
+                TempData["SuccessMessage"] = "Користувача успішно створено.";
+                return RedirectToAction(nameof(Index));
             }
-
             return View(model);
         }
 
         // GET: Users/Edit/5
-        [Authorize(Roles = "Admin")]
+        [Authorize()]
         public async Task<IActionResult> Edit(int id)
         {
+            Console.WriteLine($"Початок дії Edit (GET) для користувача з ID: {id}");
+
             var user = await _userService.GetUserByIdAsync(id);
             if (user == null)
+            {
+                Console.WriteLine($"Користувача з ID {id} не знайдено.");
                 return NotFound();
+            }
 
-            var model = _mapper.Map<UserViewModel>(user);
-            return View(model);
+            var userViewModel = _mapper.Map<UserViewModel>(user);
+            Console.WriteLine($"Користувач {user.Login} замаплений до UserViewModel.");
+
+            // Отримати всі доступні ролі
+            var roles = await _roleService.GetAllRolesAsync();
+            if (roles == null || !roles.Any())
+            {
+                Console.WriteLine("Немає доступних ролей у базі даних.");
+                ModelState.AddModelError("", "Немає доступних ролей. Зверніться до адміністратора.");
+                return View(userViewModel);
+            }
+
+            userViewModel.Roles = roles.Select(r => new SelectListItem
+            {
+                Value = r.RoleName,
+                Text = r.RoleName
+            });
+
+            Console.WriteLine($"Заповнено {userViewModel.Roles.Count()} ролей у ViewModel.");
+
+            return View(userViewModel);
         }
 
         // POST: Users/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(UserViewModel model)
+        [Authorize()]
+        public async Task<IActionResult> Edit(int id, UserViewModel model)
         {
-            if (ModelState.IsValid)
+            if (id != model.UserId)
             {
-                var user = await _userService.GetUserByIdAsync(model.UserId);
-                if (user == null)
-                    return NotFound();
-
-                // Оновлюємо властивості
-                user.Login = model.Login;
-                user.FirstName = model.FirstName;
-                user.LastName = model.LastName;
-                user.Gender = model.Gender;
-                user.Email = model.Email;
-                user.Phone = model.Phone;
-                user.BankCardData = model.BankCardData;
-
-                if (!string.IsNullOrEmpty(model.Password))
-                {
-                    // Оновлюємо пароль, якщо він введений
-                    user.PasswordHash = ComputeHash(model.Password);
-                }
-
-                try
-                {
-                    await _userService.UpdateUserAsync(user);
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (System.Exception)
-                {
-                    ModelState.AddModelError(string.Empty, "Не вдалося оновити користувача.");
-                }
+                Console.WriteLine($"ID користувача з URL ({id}) не співпадає з ID у моделі ({model.UserId}).");
+                return NotFound();
             }
 
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    // Отримати існуючого користувача
+                    var existingUser = await _userService.GetUserByIdAsync(id);
+                    if (existingUser == null)
+                    {
+                        Console.WriteLine($"Користувача з ID {id} не знайдено.");
+                        return NotFound();
+                    }
+
+                    // Оновити властивості користувача
+                    existingUser.Login = model.Login;
+                    existingUser.Email = model.Email;
+                    existingUser.FirstName = model.FirstName;
+                    existingUser.LastName = model.LastName;
+                    existingUser.Gender = model.Gender;
+                    existingUser.Phone = model.Phone;
+                    existingUser.BankCardData = model.BankCardData;
+
+                    // Обробка адреси
+                    if (!string.IsNullOrWhiteSpace(model.Address))
+                    {
+                        var parts = model.Address.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                        if (parts.Length == 3)
+                        {
+                            var street = parts[0].Trim();
+                            var city = parts[1].Trim();
+                            var country = parts[2].Trim();
+
+                            var newAddress = new Address
+                            {
+                                Street = street,
+                                City = city,
+                                Country = country
+                            };
+
+                            await _addressService.AddAddressAsync(newAddress);
+                            Console.WriteLine($"Додано нову адресу: {newAddress.Street}, {newAddress.City}, {newAddress.Country}");
+
+                            existingUser.AddressId = newAddress.AddressId;
+                            existingUser.AddressEntity = newAddress;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Невірний формат адреси.");
+                            ModelState.AddModelError("Address", "Адреса повинна містити вулицю, місто та країну, розділені комами.");
+
+                            // Повторно завантажити ролі для відображення у випадаючому списку
+                            var roles = await _roleService.GetAllRolesAsync();
+                            model.Roles = roles.Select(r => new SelectListItem
+                            {
+                                Value = r.RoleName,
+                                Text = r.RoleName
+                            });
+                            Console.WriteLine($"Заповнено {model.Roles.Count()} ролей у ViewModel.");
+
+                            return View(model);
+                        }
+                    }
+
+                    // Оновити роль користувача
+                    var role = await _roleService.GetRoleByNameAsync(model.RoleName);
+                    if (role == null)
+                    {
+                        Console.WriteLine($"Роль '{model.RoleName}' не знайдена.");
+                        ModelState.AddModelError("RoleName", "Обрана роль не існує.");
+
+                        // Повторно завантажити ролі для відображення у випадаючому списку
+                        var roles = await _roleService.GetAllRolesAsync();
+                        model.Roles = roles.Select(r => new SelectListItem
+                        {
+                            Value = r.RoleName,
+                            Text = r.RoleName
+                        });
+                        Console.WriteLine($"Заповнено {model.Roles.Count()} ролей у ViewModel.");
+
+                        return View(model);
+                    }
+                    existingUser.RoleId = role.RoleId;
+                    existingUser.Role = role;
+                    Console.WriteLine($"Присвоєно користувачу роль: {role.RoleName}");
+
+                    // Оновити користувача через сервіс
+                    await _userService.UpdateUserAsync(existingUser);
+                    Console.WriteLine("Користувача успішно оновлено.");
+
+                    TempData["SuccessMessage"] = "Користувача успішно оновлено.";
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"{ex} Помилка при оновленні користувача з ID {id}");
+                    ModelState.AddModelError("", $"Помилка при оновленні користувача: {ex.Message}");
+
+                    // Повторно завантажити ролі для відображення у випадаючому списку
+                    var roles = await _roleService.GetAllRolesAsync();
+                    model.Roles = roles.Select(r => new SelectListItem
+                    {
+                        Value = r.RoleName,
+                        Text = r.RoleName
+                    });
+                    Console.WriteLine($"Заповнено {model.Roles.Count()} ролей у ViewModel.");
+                    return View(model);
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+                Console.WriteLine("ModelState не валідний.");
+
+                // Логування помилок ModelState
+                foreach (var state in ModelState)
+                {
+                    foreach (var error in state.Value.Errors)
+                    {
+                        Console.WriteLine($"Error in {state.Key}: {error.ErrorMessage}");
+                    }
+                }
+
+                // Повторно завантажити ролі для відображення у випадаючому списку
+                var rolesReload = await _roleService.GetAllRolesAsync();
+                if (rolesReload != null && rolesReload.Any())
+                {
+                    model.Roles = rolesReload.Select(r => new SelectListItem
+                    {
+                        Value = r.RoleName,
+                        Text = r.RoleName
+                    });
+                    Console.WriteLine($"Заповнено {model.Roles.Count()} ролей у ViewModel.");
+                }
+                else
+                {
+                    Console.WriteLine("Немає доступних ролей у базі даних.");
+                    ModelState.AddModelError("", "Немає доступних ролей. Зверніться до адміністратора.");
+                }
+            }
             return View(model);
         }
 
+
+
         // GET: Users/Delete/5
-        [Authorize(Roles = "Admin")]
+        [Authorize()]
         public async Task<IActionResult> Delete(int id)
         {
             var user = await _userService.GetUserByIdAsync(id);
             if (user == null)
                 return NotFound();
 
-            var model = _mapper.Map<UserViewModel>(user);
-            return View(model);
+            var userViewModel = _mapper.Map<UserViewModel>(user);
+            return View(userViewModel);
         }
 
         // POST: Users/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize()]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _userService.DeleteUserAsync(id);
-            return RedirectToAction(nameof(Index));
-        }
-
-        private string ComputeHash(string input)
-        {
-            using (var sha256 = System.Security.Cryptography.SHA256.Create())
+            try
             {
-                var bytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(input));
-                var builder = new System.Text.StringBuilder();
-                foreach (var b in bytes)
-                    builder.Append(b.ToString("x2"));
-                return builder.ToString();
+                await _userService.DeleteUserAsync(id);
+                TempData["SuccessMessage"] = "Користувача успішно видалено.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Помилка при видаленні користувача з ID {id}: {ex.Message}");
+                ModelState.AddModelError("", $"Помилка при видаленні користувача: {ex.Message}");
+                var user = await _userService.GetUserByIdAsync(id);
+                if (user == null)
+                    return NotFound();
+                var userViewModel = _mapper.Map<UserViewModel>(user);
+                return View(userViewModel);
             }
         }
     }

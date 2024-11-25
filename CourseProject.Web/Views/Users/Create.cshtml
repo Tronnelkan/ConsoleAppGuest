@@ -1,75 +1,94 @@
-﻿@model CourseProject.Web.Models.UserViewModel
+﻿@model CourseProject.Web.ViewModels.UserViewModel
 
 @{
-    ViewData["Title"] = "Створити Користувача";
+    ViewData["Title"] = "Створення Користувача";
 }
 
-<h1>Створити Користувача</h1>
+<h1 class="mb-4">Створення Користувача</h1>
 
-<form asp-action="Create" method="post">
-    <div asp-validation-summary="All" class="text-danger"></div>
+<form method="post" action="/Users/Create" class="mt-4">
+    @Html.AntiForgeryToken()
+
+    @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
+
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label for="Login" class="font-weight-bold">Логін</label>
+            <input type="text" name="Login" id="Login" class="form-control" placeholder="Введіть логін" />
+            <span class="text-danger">@Html.ValidationMessage("Login")</span>
+        </div>
+        <div class="form-group col-md-6">
+            <label for="Email" class="font-weight-bold">Email</label>
+            <input type="email" name="Email" id="Email" class="form-control" placeholder="Введіть Email" />
+            <span class="text-danger">@Html.ValidationMessage("Email")</span>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label for="Password" class="font-weight-bold">Пароль</label>
+            <input type="password" name="Password" id="Password" class="form-control" placeholder="Введіть пароль" />
+            <span class="text-danger">@Html.ValidationMessage("Password")</span>
+        </div>
+        <div class="form-group col-md-6">
+            <label for="ConfirmPassword" class="font-weight-bold">Підтвердження пароля</label>
+            <input type="password" name="ConfirmPassword" id="ConfirmPassword" class="form-control" placeholder="Підтвердіть пароль" />
+            <span class="text-danger">@Html.ValidationMessage("ConfirmPassword")</span>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label for="FirstName" class="font-weight-bold">Ім'я</label>
+            <input type="text" name="FirstName" id="FirstName" class="form-control" placeholder="Введіть ім'я" />
+            <span class="text-danger">@Html.ValidationMessage("FirstName")</span>
+        </div>
+        <div class="form-group col-md-6">
+            <label for="LastName" class="font-weight-bold">Прізвище</label>
+            <input type="text" name="LastName" id="LastName" class="form-control" placeholder="Введіть прізвище" />
+            <span class="text-danger">@Html.ValidationMessage("LastName")</span>
+        </div>
+    </div>
 
     <div class="form-group">
-        <label asp-for="Login" class="control-label"></label>
-        <input asp-for="Login" class="form-control" />
-        <span asp-validation-for="Login" class="text-danger"></span>
+        <label for="Gender" class="font-weight-bold">Стать</label>
+        <select name="Gender" id="Gender" class="form-control">
+            <option value="">Оберіть стать</option>
+            <option value="Male">Чоловіча</option>
+            <option value="Female">Жіноча</option>
+            <option value="Other">Інша</option>
+        </select>
+        <span class="text-danger">@Html.ValidationMessage("Gender")</span>
     </div>
+
     <div class="form-group">
-        <label asp-for="Password" class="control-label"></label>
-        <input asp-for="Password" class="form-control" type="password" />
-        <span asp-validation-for="Password" class="text-danger"></span>
+        <label for="RecoveryKeyword" class="font-weight-bold">Recovery Keyword</label>
+        <input type="text" name="RecoveryKeyword" id="RecoveryKeyword" class="form-control" placeholder="Введіть Recovery Keyword" />
+        <span class="text-danger">@Html.ValidationMessage("RecoveryKeyword")</span>
     </div>
+
     <div class="form-group">
-        <label asp-for="ConfirmPassword" class="control-label"></label>
-        <input asp-for="ConfirmPassword" class="form-control" type="password" />
-        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+        <label for="Phone" class="font-weight-bold">Телефон</label>
+        <input type="tel" name="Phone" id="Phone" class="form-control" placeholder="+380XXXXXXXXX" />
+        <span class="text-danger">@Html.ValidationMessage("Phone")</span>
     </div>
+
     <div class="form-group">
-        <label asp-for="FirstName" class="control-label"></label>
-        <input asp-for="FirstName" class="form-control" />
-        <span asp-validation-for="FirstName" class="text-danger"></span>
+        <label for="Address" class="font-weight-bold">Адреса</label>
+        <input type="text" name="Address" id="Address" class="form-control" placeholder="Вулиця, Місто, Країна" />
+        <span class="text-danger">@Html.ValidationMessage("Address")</span>
     </div>
+
     <div class="form-group">
-        <label asp-for="LastName" class="control-label"></label>
-        <input asp-for="LastName" class="form-control" />
-        <span asp-validation-for="LastName" class="text-danger"></span>
+        <label for="BankCardData" class="font-weight-bold">Дані банківської картки</label>
+        <input type="text" name="BankCardData" id="BankCardData" class="form-control" placeholder="XXXX-XXXX-XXXX-XXXX" />
+        <span class="text-danger">@Html.ValidationMessage("BankCardData")</span>
     </div>
-    <div class="form-group">
-        <label asp-for="Gender" class="control-label"></label>
-        <input asp-for="Gender" class="form-control" />
-        <span asp-validation-for="Gender" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Email" class="control-label"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Phone" class="control-label"></label>
-        <input asp-for="Phone" class="form-control" />
-        <span asp-validation-for="Phone" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="BankCardData" class="control-label"></label>
-        <input asp-for="BankCardData" class="form-control" />
-        <span asp-validation-for="BankCardData" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label class="control-label">Роль</label>
-        <input type="text" class="form-control" value="Guest" readonly />
-    </div>
-    <div class="form-group">
-        <label class="control-label">Адреса</label>
-        <input type="text" class="form-control" value="123 Default St, Default City, Default Country" readonly />
-    </div>
-    <div class="form-group">
-        <input type="submit" value="Створити" class="btn btn-primary" />
-        <a asp-action="Index" class="btn btn-secondary">Скасувати</a>
-    </div>
+
+    <button type="submit" class="btn btn-primary">Створити</button>
+    <a href="@Url.Action("Index", "Users")" class="btn btn-secondary">Скасувати</a>
 </form>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 }

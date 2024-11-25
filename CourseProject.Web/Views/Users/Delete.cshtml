@@ -1,63 +1,15 @@
-﻿@model CourseProject.Web.Models.UserViewModel
+﻿@model CourseProject.Web.ViewModels.UserViewModel
 
 @{
-    ViewData["Title"] = "Видалити Користувача";
+    ViewData["Title"] = "Видалення Користувача";
 }
 
-<h1>Видалити Користувача</h1>
+<h1>Видалення Користувача</h1>
 
-<h3>Ви впевнені, що хочете видалити цього користувача?</h3>
-<div>
-    <h4>Користувач</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            Логін
-        </dt>
-        <dd class="col-sm-10">
-            @Model.Login
-        </dd>
-        <dt class="col-sm-2">
-            Ім'я
-        </dt>
-        <dd class="col-sm-10">
-            @Model.FirstName
-        </dd>
-        <dt class="col-sm-2">
-            Прізвище
-        </dt>
-        <dd class="col-sm-10">
-            @Model.LastName
-        </dd>
-        <dt class="col-sm-2">
-            Email
-        </dt>
-        <dd class="col-sm-10">
-            @Model.Email
-        </dd>
-        <dt class="col-sm-2">
-            Телефон
-        </dt>
-        <dd class="col-sm-10">
-            @Model.Phone
-        </dd>
-        <dt class="col-sm-2">
-            Роль
-        </dt>
-        <dd class="col-sm-10">
-            @Model.RoleName
-        </dd>
-        <dt class="col-sm-2">
-            Адреса
-        </dt>
-        <dd class="col-sm-10">
-            @Model.Address
-        </dd>
-    </dl>
+<h3>Ви впевнені, що хочете видалити користувача <strong>@Model.Login</strong>?</h3>
 
-    <form asp-action="DeleteConfirmed" method="post">
-        <input type="hidden" asp-for="UserId" />
-        <input type="submit" value="Видалити" class="btn btn-danger" />
-        <a asp-action="Index" class="btn btn-secondary">Скасувати</a>
-    </form>
-</div>
+<form action="/Users/Delete/@Model.UserId" method="post">
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-danger">Видалити</button>
+    <a href="/Users" class="btn btn-secondary">Скасувати</a>
+</form>
